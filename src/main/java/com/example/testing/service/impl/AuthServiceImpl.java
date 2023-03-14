@@ -1,6 +1,7 @@
 package com.example.testing.service.impl;
 
 import com.example.testing.exceptions.ResourceAlreadyExistException;
+import com.example.testing.exceptions.ResourceNotFoundException;
 import com.example.testing.model.User;
 import com.example.testing.payload.UserDto;
 import com.example.testing.payload.auth.SignInRequestDto;
@@ -15,6 +16,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -62,6 +64,31 @@ public class AuthServiceImpl implements AuthService {
 
         String token = jwtService.createToken(user);
         return new SignInResponseDto(token);
+    }
+
+    @Override
+    public Authentication exchangeToken(String token) {
+        log.debug("Exchange token");
+
+        String userId = jwtService.decodeToken(token);
+
+        User user = getUser(userId);
+        PreAuthenticatedAuthenticationToken authToken = new PreAuthenticatedAuthenticationToken(user, token);
+        if(user.isEnabled()) {
+            authToken.setAuthenticated(true);
+        }
+
+        return authToken;
+    }
+
+    private User getUser(String userId) {
+        Optional<User> optionalUser = userRepository.findById(userId);
+        if (optionalUser.isEmpty()) {
+            log.error("User with id '{}' doesn't exist", userId);
+            throw new ResourceNotFoundException("User", "id", userId);
+        }
+
+        return optionalUser.get();
     }
 
     private User createUser(UserDto userDto) {
