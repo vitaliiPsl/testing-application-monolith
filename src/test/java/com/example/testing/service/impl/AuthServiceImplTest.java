@@ -3,13 +3,21 @@ package com.example.testing.service.impl;
 import com.example.testing.exceptions.ResourceAlreadyExistException;
 import com.example.testing.model.User;
 import com.example.testing.payload.UserDto;
+import com.example.testing.payload.auth.SignInRequestDto;
+import com.example.testing.payload.auth.SignInResponseDto;
 import com.example.testing.repository.UserRepository;
+import com.example.testing.service.JwtService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 
 import java.util.Optional;
 
@@ -26,13 +34,20 @@ class AuthServiceImplTest {
     UserRepository userRepository;
 
     @Mock
+    JwtService jwtService;
+
+    @Mock
     PasswordEncoder passwordEncoder;
+
+    @Mock
+    AuthenticationManager authManager;
 
     @Spy
     ModelMapper mapper;
 
     @InjectMocks
     AuthServiceImpl authService;
+
 
     @Captor
     ArgumentCaptor<User> userCaptor;
@@ -60,8 +75,11 @@ class AuthServiceImplTest {
         verify(userRepository).save(userCaptor.capture());
 
         User user = userCaptor.getValue();
+        assertThat(user.getFirstName(), is(user.getFirstName()));
+        assertThat(user.getLastName(), is(user.getLastName()));
         assertThat(user.getEmail(), is(userDto.getEmail()));
         assertThat(user.getPassword(), is(encodedPassword));
+        assertThat(user.getRole(), is(userDto.getRole()));
         assertThat(user.isEnabled(), is(true));
 
         assertThat(response.getEmail(), is(userDto.getEmail()));
@@ -80,5 +98,54 @@ class AuthServiceImplTest {
         // then
         assertThrows(ResourceAlreadyExistException.class, () -> authService.signUp(userDto));
         verify(userRepository).findByEmail(userDto.getEmail());
+    }
+
+    @Test
+    void whenSignIn_givenCredentialsAreValid_thenGenerateJwt() {
+        // given
+        String email = "j.doe@mail.com";
+        String password = "password";
+        String jwt = "eyJ0eXA.eyJzdWIi.Ou-2-0gYTg";
+
+        SignInRequestDto request = SignInRequestDto.builder()
+                .email(email)
+                .password(password)
+                .build();
+
+
+        Authentication auth = new UsernamePasswordAuthenticationToken(email, password);
+
+        User user = User.builder().id("1234").email("j.doe@mail.com").build();
+        Authentication verified = new PreAuthenticatedAuthenticationToken(user, "");
+
+        // when
+        when(authManager.authenticate(auth)).thenReturn(verified);
+        when(jwtService.createToken(user)).thenReturn(jwt);
+
+        SignInResponseDto response = authService.signIn(request);
+
+        // then
+        verify(authManager).authenticate(auth);
+        verify(jwtService).createToken(user);
+
+        assertThat(response.getToken(), is(jwt));
+    }
+
+    @Test
+    void whenSignIn_givenCredentialsAreInvalid_thenThrowException() {
+        // given
+        String email = "j.doe@mail.com";
+        String password = "password";
+
+        SignInRequestDto request = SignInRequestDto.builder().email(email).password(password).build();
+
+        Authentication auth = new UsernamePasswordAuthenticationToken(email, password);
+
+        // when
+        when(authManager.authenticate(auth)).thenThrow(new BadCredentialsException("Invalid password"));
+
+        // then
+        assertThrows(BadCredentialsException.class, () -> authService.signIn(request));
+        verify(authManager).authenticate(auth);
     }
 }
