@@ -6,3 +6,8 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
+security:
+  jwt:
+    secret: jwt.super.secret.key
+    # token expires in 7 days
+    token-expiration-time-min: 10080
