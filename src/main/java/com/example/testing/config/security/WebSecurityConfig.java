@@ -4,6 +4,7 @@ import com.example.testing.filters.JwtVerificationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
@@ -26,6 +27,9 @@ public class WebSecurityConfig {
 
         http.authorizeRequests()
                 .antMatchers("/api/auth/**").permitAll()
+                .antMatchers(HttpMethod.POST, "/api/subjects").hasRole("EDUCATOR")
+                .antMatchers(HttpMethod.PUT, "/api/subjects").hasRole("EDUCATOR")
+                .antMatchers(HttpMethod.DELETE, "/api/subjects").hasRole("EDUCATOR")
                 .anyRequest().authenticated();
 
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
