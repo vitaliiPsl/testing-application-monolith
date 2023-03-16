@@ -33,4 +33,13 @@ public class TestController {
     ) {
         return testService.updateTest(subjectId, testId, req, user);
     }
+
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @DeleteMapping("{testId}")
+    void deleteTest(
+            @PathVariable String subjectId, @PathVariable String testId,
+            @AuthenticationPrincipal User user
+    ) {
+        testService.deleteTest(subjectId, testId, user);
+    }
 }
