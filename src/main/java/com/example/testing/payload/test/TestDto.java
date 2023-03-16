@@ -1,6 +1,6 @@
 package com.example.testing.payload.test;
 
-import com.example.testing.model.Subject;
+import com.example.testing.payload.SubjectDto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,7 +23,7 @@ public class TestDto {
     private String id;
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    private Subject subject;
+    private SubjectDto subject;
 
     @JsonProperty(access = JsonProperty.Access.READ_WRITE)
     @NotBlank(message = "Test name is required")

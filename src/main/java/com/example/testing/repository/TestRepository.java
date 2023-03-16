@@ -11,7 +11,7 @@ import java.util.Optional;
 @Repository
 public interface TestRepository extends JpaRepository<Test, String> {
 
-    Optional<Test> findByIdAndSubject(String testId, Subject subject);
+    Optional<Test> findByIdAndSubjectAndDeletedAtIsNull(String testId, Subject subject);
 
-    List<Test> findBySubject(Subject subject);
+    List<Test> findBySubjectAndDeletedAtIsNull(Subject subject);
 }

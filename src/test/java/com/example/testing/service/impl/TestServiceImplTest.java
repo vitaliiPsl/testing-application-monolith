@@ -246,14 +246,14 @@ class TestServiceImplTest {
 
         // when
         when(subjectService.getSubjectEntityAndVerifyEducator(subjectId, user)).thenReturn(subject);
-        when(testRepository.findByIdAndSubject(testId, subject)).thenReturn(Optional.of(test));
+        when(testRepository.findByIdAndSubjectAndDeletedAtIsNull(testId, subject)).thenReturn(Optional.of(test));
         when(testRepository.save(any(Test.class))).then(AdditionalAnswers.returnsFirstArg());
 
         TestDto res = testService.updateTest(subjectId, testId, testDto, user);
 
         // then
         verify(subjectService).getSubjectEntityAndVerifyEducator(subjectId, user);
-        verify(testRepository).findByIdAndSubject(testId, subject);
+        verify(testRepository).findByIdAndSubjectAndDeletedAtIsNull(testId, subject);
         verify(testRepository).save(testCaptor.capture());
 
         assertThat(res.getName(), is(testDto.getName()));
@@ -306,12 +306,12 @@ class TestServiceImplTest {
 
         // when
         when(subjectService.getSubjectEntityAndVerifyEducator(subjectId, user)).thenReturn(subject);
-        when(testRepository.findByIdAndSubject(testId, subject)).thenReturn(Optional.of(test));
+        when(testRepository.findByIdAndSubjectAndDeletedAtIsNull(testId, subject)).thenReturn(Optional.of(test));
 
         // then
         assertThrows(IllegalStateException.class, () -> testService.updateTest(subjectId, testId, testDto, user));
         verify(subjectService).getSubjectEntityAndVerifyEducator(subjectId, user);
-        verify(testRepository).findByIdAndSubject(testId, subject);
+        verify(testRepository).findByIdAndSubjectAndDeletedAtIsNull(testId, subject);
     }
 
     @org.junit.jupiter.api.Test
@@ -347,12 +347,12 @@ class TestServiceImplTest {
 
         // when
         when(subjectService.getSubjectEntityAndVerifyEducator(subjectId, user)).thenReturn(subject);
-        when(testRepository.findByIdAndSubject(testId, subject)).thenReturn(Optional.of(test));
+        when(testRepository.findByIdAndSubjectAndDeletedAtIsNull(testId, subject)).thenReturn(Optional.of(test));
 
         // then
         assertThrows(IllegalStateException.class, () -> testService.updateTest(subjectId, testId, testDto, user));
         verify(subjectService).getSubjectEntityAndVerifyEducator(subjectId, user);
-        verify(testRepository).findByIdAndSubject(testId, subject);
+        verify(testRepository).findByIdAndSubjectAndDeletedAtIsNull(testId, subject);
     }
 
     @org.junit.jupiter.api.Test
@@ -371,12 +371,12 @@ class TestServiceImplTest {
 
         // when
         when(subjectService.getSubjectEntityAndVerifyEducator(subjectId, user)).thenReturn(subject);
-        when(testRepository.findByIdAndSubject(testId, subject)).thenReturn(Optional.empty());
+        when(testRepository.findByIdAndSubjectAndDeletedAtIsNull(testId, subject)).thenReturn(Optional.empty());
 
         // then
         assertThrows(ResourceNotFoundException.class, () -> testService.updateTest(subjectId, testId, testDto, user));
         verify(subjectService).getSubjectEntityAndVerifyEducator(subjectId, user);
-        verify(testRepository).findByIdAndSubject(testId, subject);
+        verify(testRepository).findByIdAndSubjectAndDeletedAtIsNull(testId, subject);
     }
 
     @org.junit.jupiter.api.Test
@@ -416,6 +416,88 @@ class TestServiceImplTest {
 
         // then
         assertThrows(ForbiddenException.class, () -> testService.updateTest(subjectId, testId, testDto, user));
+        verify(subjectService).getSubjectEntityAndVerifyEducator(subjectId, user);
+    }
+
+    // DELETE
+    @org.junit.jupiter.api.Test
+    void whenDeleteTest_givenValidRequest_thenDeleteTest() {
+        // given
+        String subjectId = "1234-qwer";
+
+        User user = User.builder().id("qwer-1234").email("j.doe@mail.com").role(UserRole.EDUCATOR).build();
+        Subject subject = Subject.builder().id(subjectId).educator(user).build();
+
+        String testId = "qwer-1234";
+        Test test = Test.builder().id(testId).subject(subject).name("First test").build();
+
+        // when
+        when(subjectService.getSubjectEntityAndVerifyEducator(subjectId, user)).thenReturn(subject);
+        when(testRepository.findByIdAndSubjectAndDeletedAtIsNull(testId, subject)).thenReturn(Optional.of(test));
+
+        testService.deleteTest(subjectId, testId, user);
+
+        // then
+        verify(subjectService).getSubjectEntityAndVerifyEducator(subjectId, user);
+        verify(testRepository).findByIdAndSubjectAndDeletedAtIsNull(testId, subject);
+        verify(testRepository).save(testCaptor.capture());
+
+        Test capturedTest = testCaptor.getValue();
+        assertThat(capturedTest.getId(), is(testId));
+        assertThat(capturedTest.getDeletedAt(), is(notNullValue()));
+    }
+
+    @org.junit.jupiter.api.Test
+    void whenDeleteTest_givenTestDoesntExist_thenThrowException() {
+        // given
+        String subjectId = "1234-qwer";
+
+        User user = User.builder().id("qwer-1234").email("j.doe@mail.com").role(UserRole.EDUCATOR).build();
+        Subject subject = Subject.builder().id(subjectId).educator(user).build();
+
+        String testId = "qwer-1234";
+
+        // when
+        when(subjectService.getSubjectEntityAndVerifyEducator(subjectId, user)).thenReturn(subject);
+        when(testRepository.findByIdAndSubjectAndDeletedAtIsNull(testId, subject)).thenReturn(Optional.empty());
+
+        // then
+        assertThrows(ResourceNotFoundException.class, () -> testService.deleteTest(subjectId, testId, user));
+        verify(subjectService).getSubjectEntityAndVerifyEducator(subjectId, user);
+        verify(testRepository).findByIdAndSubjectAndDeletedAtIsNull(testId, subject);
+    }
+
+    @org.junit.jupiter.api.Test
+    void whenDeleteTest_givenSubjectDoesntExist_thenThrowException() {
+        // given
+        String subjectId = "1234-qwer";
+
+        User user = User.builder().id("qwer-1234").email("j.doe@mail.com").role(UserRole.EDUCATOR).build();
+
+        String testId = "qwer-1234";
+
+        // when
+        when(subjectService.getSubjectEntityAndVerifyEducator(subjectId, user)).thenThrow(ResourceNotFoundException.class);
+
+        // then
+        assertThrows(ResourceNotFoundException.class, () -> testService.deleteTest(subjectId, testId, user));
+        verify(subjectService).getSubjectEntityAndVerifyEducator(subjectId, user);
+    }
+
+    @org.junit.jupiter.api.Test
+    void whenDeleteTest_givenUserIsNotEducatorOfTheSubject_thenThrowException() {
+        // given
+        String subjectId = "1234-qwer";
+
+        User user = User.builder().id("qwer-1234").email("j.doe@mail.com").role(UserRole.EDUCATOR).build();
+
+        String testId = "qwer-1234";
+
+        // when
+        when(subjectService.getSubjectEntityAndVerifyEducator(subjectId, user)).thenThrow(ForbiddenException.class);
+
+        // then
+        assertThrows(ForbiddenException.class, () -> testService.deleteTest(subjectId, testId, user));
         verify(subjectService).getSubjectEntityAndVerifyEducator(subjectId, user);
     }
 }

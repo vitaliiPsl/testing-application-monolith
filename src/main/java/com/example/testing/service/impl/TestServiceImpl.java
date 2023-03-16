@@ -68,7 +68,7 @@ public class TestServiceImpl implements TestService {
         Subject subject = subjectService.getSubjectEntityAndVerifyEducator(subjectId, user);
 
         // fetch test
-        Test test = testRepository.findByIdAndSubject(testId, subject)
+        Test test = testRepository.findByIdAndSubjectAndDeletedAtIsNull(testId, subject)
                 .orElseThrow(() -> new ResourceNotFoundException("test", "id", testId));
 
         // TODO: verify that no one has already taken the test
@@ -86,6 +86,22 @@ public class TestServiceImpl implements TestService {
         return mapTestToTestDto(test);
     }
 
+    @Override
+    public void deleteTest(String subjectId, String testId, User user) {
+        log.debug("Delete test with subject id {} and test id {}", subjectId, testId);
+
+        Subject subject = subjectService.getSubjectEntityAndVerifyEducator(subjectId, user);
+
+        // fetch test
+        Test test = testRepository.findByIdAndSubjectAndDeletedAtIsNull(testId, subject)
+                .orElseThrow(() -> new ResourceNotFoundException("test", "id", testId));
+
+        // set soft deletion
+        test.setDeletedAt(LocalDateTime.now());
+
+        testRepository.save(test);
+    }
+
     private Set<Question> createQuestions(Set<QuestionDto> questionDtos, Test test) {
         return questionDtos.stream().map(questionDto -> createQuestion(questionDto, test)).collect(Collectors.toSet());
     }
@@ -100,7 +116,7 @@ public class TestServiceImpl implements TestService {
         if (options.size() < MIN_NUMBER_OF_OPTIONS) {
             log.error("Requires at least {} option. Received: {}", MIN_NUMBER_OF_OPTIONS, options.size());
             throw new IllegalStateException(
-                    String.format("There must be at least %s option for question: '%s'\n", MIN_NUMBER_OF_OPTIONS, question.getQuestion())
+                    String.format("There must be at least %s option for question: '%s'", MIN_NUMBER_OF_OPTIONS, question.getQuestion())
             );
         }
 
@@ -108,7 +124,7 @@ public class TestServiceImpl implements TestService {
         if (question.getCorrectOptions().size() < 1) {
             log.error("Requires at least one correct option. Received: {}", question.getCorrectOptions().size());
             throw new IllegalStateException(
-                    String.format("There must be at least %s correct option for question: '%s'\n", MIN_NUMBER_OF_CORRECT_OPTIONS, question.getQuestion())
+                    String.format("There must be at least %s correct option for question: '%s'", MIN_NUMBER_OF_CORRECT_OPTIONS, question.getQuestion())
             );
         }
 

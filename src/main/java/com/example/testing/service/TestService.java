@@ -28,4 +28,13 @@ public interface TestService {
      * @return updated test
      */
     TestDto updateTest(String subjectId, String testId, TestDto req, User user);
+
+    /**
+     * Delete given test softly
+     *
+     * @param subjectId id of the subject
+     * @param testId    id of the test
+     * @param user      authenticated user
+     */
+    void deleteTest(String subjectId, String testId, User user);
 }
