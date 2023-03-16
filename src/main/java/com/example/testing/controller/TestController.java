@@ -9,6 +9,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
@@ -41,5 +42,15 @@ public class TestController {
             @AuthenticationPrincipal User user
     ) {
         testService.deleteTest(subjectId, testId, user);
+    }
+
+    @GetMapping("{testId}")
+    TestDto getTests(@PathVariable String subjectId, @PathVariable String testId) {
+        return testService.getTestById(subjectId, testId);
+    }
+
+    @GetMapping
+    List<TestDto> getTestById(@PathVariable String subjectId) {
+        return testService.getTestsBySubjectId(subjectId);
     }
 }
