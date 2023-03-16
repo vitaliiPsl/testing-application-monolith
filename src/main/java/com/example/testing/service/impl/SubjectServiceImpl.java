@@ -100,7 +100,7 @@ public class SubjectServiceImpl implements SubjectService {
     public List<SubjectDto> getAllSubjects() {
         log.debug("Get all subjects");
 
-        return subjectRepository.findALlByDeletedAtIsNull()
+        return subjectRepository.findAllByDeletedAtIsNull()
                 .stream().map(this::mapSubjectToSubjectDto).collect(Collectors.toList());
     }
 
@@ -113,6 +113,29 @@ public class SubjectServiceImpl implements SubjectService {
 
         return subjectRepository.findAllByEducatorAndDeletedAtIsNull(educator)
                 .stream().map(this::mapSubjectToSubjectDto).collect(Collectors.toList());
+    }
+
+    @Override
+    public Subject getSubjectEntity(String subjectId) {
+        log.debug("Get subject with given id {}", subjectId);
+
+        return subjectRepository.findByIdAndDeletedAtIsNull(subjectId)
+                .orElseThrow(() -> new ResourceNotFoundException("Subject", "id", subjectId));
+    }
+
+    @Override
+    public Subject getSubjectEntityAndVerifyEducator(String subjectId, User user) {
+        log.debug("Get subject with given id {} and verify that user is educator of given subject", subjectId);
+
+        Subject subject = getSubjectEntity(subjectId);
+
+        // check if user is an educator of the given subject
+        if (!subject.getEducator().equals(user)) {
+            log.error("User {} is not an educator on the given subject", user.getId());
+            throw new ForbiddenException("Not an educator of the given subject");
+        }
+
+        return subject;
     }
 
     private Subject getSubject(String subjectId) {

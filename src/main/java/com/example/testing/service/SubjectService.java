@@ -1,5 +1,6 @@
 package com.example.testing.service;
 
+import com.example.testing.model.Subject;
 import com.example.testing.model.User;
 import com.example.testing.payload.SubjectDto;
 
@@ -59,4 +60,21 @@ public interface SubjectService {
      * @return list of the subjects of given educator
      */
     List<SubjectDto> getSubjectsByEducatorId(String educatorId);
+
+    /**
+     * Get subject entity
+     *
+     * @param subjectId id of the subject
+     * @return retrieved subject
+     */
+    Subject getSubjectEntity(String subjectId);
+
+    /**
+     * Get subject entity with given id and verify that user is educator of that subject
+     *
+     * @param subjectId id of the subject
+     * @param user      authenticated user
+     * @return fetched subject
+     */
+    Subject getSubjectEntityAndVerifyEducator(String subjectId, User user);
 }

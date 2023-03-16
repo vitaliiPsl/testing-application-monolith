@@ -13,7 +13,7 @@ public interface SubjectRepository extends JpaRepository<Subject, String> {
 
     Optional<Subject> findByIdAndDeletedAtIsNull(String id);
 
-    List<Subject> findALlByDeletedAtIsNull();
+    List<Subject> findAllByDeletedAtIsNull();
 
     List<Subject> findAllByEducatorAndDeletedAtIsNull(User user);
 }

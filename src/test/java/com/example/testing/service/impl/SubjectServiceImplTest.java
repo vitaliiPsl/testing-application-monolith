@@ -233,11 +233,11 @@ class SubjectServiceImplTest {
         );
 
         // when
-        when(subjectRepository.findALlByDeletedAtIsNull()).thenReturn(subjects);
+        when(subjectRepository.findAllByDeletedAtIsNull()).thenReturn(subjects);
         List<SubjectDto> res = subjectService.getAllSubjects();
 
         // then
-        verify(subjectRepository).findALlByDeletedAtIsNull();
+        verify(subjectRepository).findAllByDeletedAtIsNull();
         assertThat(res, hasSize(subjects.size()));
     }
 
@@ -276,5 +276,86 @@ class SubjectServiceImplTest {
         // then
         assertThrows(ResourceNotFoundException.class, () -> subjectService.getSubjectsByEducatorId(educatorId));
         verify(userRepository).findByIdAndRole(educatorId, UserRole.EDUCATOR);
+    }
+
+    @Test
+    void whenGetSubjectEntity_givenSubjectExist_thenReturnSubjectEntity() {
+        // given
+        String subjectId = "1234-qwer";
+        Subject subject = Subject.builder().id(subjectId).build();
+
+        // when
+        when(subjectRepository.findByIdAndDeletedAtIsNull(subjectId)).thenReturn(Optional.of(subject));
+
+        Subject res = subjectService.getSubjectEntity(subjectId);
+
+        // then
+        verify(subjectRepository).findByIdAndDeletedAtIsNull(subjectId);
+        assertThat(res, is(subject));
+    }
+
+    @Test
+    void whenGetSubjectEntity_givenSubjectDoesntExist_thenThrowException() {
+        // given
+        String subjectId = "1234-qwer";
+
+        // when
+        when(subjectRepository.findByIdAndDeletedAtIsNull(subjectId)).thenReturn(Optional.empty());
+
+        // then
+        assertThrows(ResourceNotFoundException.class, () -> subjectService.getSubjectEntity(subjectId));
+        verify(subjectRepository).findByIdAndDeletedAtIsNull(subjectId);
+    }
+
+    @Test
+    void whenGetSubjectEntityAndVerifyEducator_givenSubjectExistAndUserIsEducatorOfThatSubject_thenReturnSubjectEntity() {
+        // given
+        String subjectId = "1234-qwer";
+
+        User user = User.builder().id("qwer-1234").email("j.doe@mail.com").role(UserRole.EDUCATOR).build();
+
+        Subject subject = Subject.builder().id(subjectId).educator(user).build();
+
+        // when
+        when(subjectRepository.findByIdAndDeletedAtIsNull(subjectId)).thenReturn(Optional.of(subject));
+
+        Subject res = subjectService.getSubjectEntityAndVerifyEducator(subjectId, user);
+
+        // then
+        verify(subjectRepository).findByIdAndDeletedAtIsNull(subjectId);
+        assertThat(res, is(subject));
+    }
+
+    @Test
+    void whenGetSubjectEntityAndVerifyEducator_givenSubjectExistAndUserIsNotEducatorOfThatSubject_thenThrowException() {
+        // given
+        String subjectId = "1234-qwer";
+
+        User user = User.builder().id("qwer-1234").email("j.doe@mail.com").role(UserRole.EDUCATOR).build();
+
+        User educator = User.builder().id("qwer-4321").email("jane.doe@mail.com").role(UserRole.EDUCATOR).build();
+        Subject subject = Subject.builder().id(subjectId).educator(educator).build();
+
+        // when
+        when(subjectRepository.findByIdAndDeletedAtIsNull(subjectId)).thenReturn(Optional.of(subject));
+
+        // then
+        assertThrows(ForbiddenException.class, () -> subjectService.getSubjectEntityAndVerifyEducator(subjectId, user));
+        verify(subjectRepository).findByIdAndDeletedAtIsNull(subjectId);
+    }
+
+    @Test
+    void whenGetSubjectEntityAndVerifyEducator_givenSubjectDoesntExist_thenThrowException() {
+        // given
+        String subjectId = "1234-qwer";
+        User user = User.builder().id("qwer-1234").email("j.doe@mail.com").role(UserRole.EDUCATOR).build();
+
+        // when
+        when(subjectRepository.findByIdAndDeletedAtIsNull(subjectId)).thenReturn(Optional.empty());
+
+        // then
+        assertThrows(ResourceNotFoundException.class,
+                () -> subjectService.getSubjectEntityAndVerifyEducator(subjectId, user));
+        verify(subjectRepository).findByIdAndDeletedAtIsNull(subjectId);
     }
 }
