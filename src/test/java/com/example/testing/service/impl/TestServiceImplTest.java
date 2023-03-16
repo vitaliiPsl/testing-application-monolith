@@ -18,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -210,4 +211,211 @@ class TestServiceImplTest {
         verify(subjectService).getSubjectEntityAndVerifyEducator(subjectId, user);
     }
 
+    // UPDATE
+    @org.junit.jupiter.api.Test
+    void whenUpdateTest_givenValidRequest_thenUpdateTest() {
+        // given
+        String subjectId = "1234-qwer";
+
+        User user = User.builder().id("qwer-1234").email("j.doe@mail.com").role(UserRole.EDUCATOR).build();
+        Subject subject = Subject.builder().id(subjectId).educator(user).build();
+
+        QuestionDto question1 = QuestionDto.builder()
+                .question("What is correct answer for question 1?")
+                .options(Set.of(
+                        OptionDto.builder().option("a").build(),
+                        OptionDto.builder().option("b").correct(true).build()
+                ))
+                .build();
+
+        QuestionDto question2 = QuestionDto.builder()
+                .question("What is correct answer for question 2?")
+                .options(Set.of(
+                        OptionDto.builder().option("a").build(),
+                        OptionDto.builder().option("b").correct(true).build()
+                ))
+                .build();
+
+        TestDto testDto = TestDto.builder()
+                .name("Test")
+                .questions(Set.of(question1, question2))
+                .build();
+
+        String testId = "qwer-1234";
+        Test test = Test.builder().id(testId).subject(subject).name("First test").build();
+
+        // when
+        when(subjectService.getSubjectEntityAndVerifyEducator(subjectId, user)).thenReturn(subject);
+        when(testRepository.findByIdAndSubject(testId, subject)).thenReturn(Optional.of(test));
+        when(testRepository.save(any(Test.class))).then(AdditionalAnswers.returnsFirstArg());
+
+        TestDto res = testService.updateTest(subjectId, testId, testDto, user);
+
+        // then
+        verify(subjectService).getSubjectEntityAndVerifyEducator(subjectId, user);
+        verify(testRepository).findByIdAndSubject(testId, subject);
+        verify(testRepository).save(testCaptor.capture());
+
+        assertThat(res.getName(), is(testDto.getName()));
+
+        Test capturedTest = testCaptor.getValue();
+        assertThat(capturedTest.getId(), is(testId));
+        assertThat(capturedTest.getName(), is(testDto.getName()));
+        assertThat(capturedTest.getSubject(), is(subject));
+        assertThat(capturedTest.getUpdatedAt(), is(notNullValue()));
+
+        Set<Question> questions = capturedTest.getQuestions();
+        assertThat(questions, hasSize(2));
+        assertThat(List.copyOf(questions).get(0).getOptions(), hasSize(2));
+        assertThat(List.copyOf(questions).get(0).getCorrectOptions(), hasSize(1));
+        assertThat(List.copyOf(questions).get(1).getOptions(), hasSize(2));
+        assertThat(List.copyOf(questions).get(1).getCorrectOptions(), hasSize(1));
+    }
+
+    @org.junit.jupiter.api.Test
+    void whenUpdateTest_givenInvalidNumberOfCorrectOptions_thenThrowException() {
+        // given
+        String subjectId = "1234-qwer";
+
+        User user = User.builder().id("qwer-1234").email("j.doe@mail.com").role(UserRole.EDUCATOR).build();
+        Subject subject = Subject.builder().id(subjectId).educator(user).build();
+
+        QuestionDto question1 = QuestionDto.builder()
+                .question("What is correct answer for question 1?")
+                .options(Set.of(
+                        OptionDto.builder().option("a").build(),
+                        OptionDto.builder().option("b").correct(true).build()
+                ))
+                .build();
+
+        QuestionDto question2 = QuestionDto.builder()
+                .question("What is correct answer for question 2?")
+                .options(Set.of(
+                        OptionDto.builder().option("a").build(),
+                        OptionDto.builder().option("b").build()
+                ))
+                .build();
+
+        TestDto testDto = TestDto.builder()
+                .name("Test")
+                .questions(Set.of(question1, question2))
+                .build();
+
+        String testId = "qwer-1234";
+        Test test = Test.builder().id(testId).subject(subject).name("First test").build();
+
+        // when
+        when(subjectService.getSubjectEntityAndVerifyEducator(subjectId, user)).thenReturn(subject);
+        when(testRepository.findByIdAndSubject(testId, subject)).thenReturn(Optional.of(test));
+
+        // then
+        assertThrows(IllegalStateException.class, () -> testService.updateTest(subjectId, testId, testDto, user));
+        verify(subjectService).getSubjectEntityAndVerifyEducator(subjectId, user);
+        verify(testRepository).findByIdAndSubject(testId, subject);
+    }
+
+    @org.junit.jupiter.api.Test
+    void whenUpdateTest_givenInvalidNumberOptions_thenThrowException() {
+        // given
+        String subjectId = "1234-qwer";
+
+        User user = User.builder().id("qwer-1234").email("j.doe@mail.com").role(UserRole.EDUCATOR).build();
+        Subject subject = Subject.builder().id(subjectId).educator(user).build();
+
+        QuestionDto question1 = QuestionDto.builder()
+                .question("What is correct answer for question 1?")
+                .options(Set.of(
+                        OptionDto.builder().option("a").build()
+                ))
+                .build();
+
+        QuestionDto question2 = QuestionDto.builder()
+                .question("What is correct answer for question 2?")
+                .options(Set.of(
+                        OptionDto.builder().option("a").build(),
+                        OptionDto.builder().option("b").build()
+                ))
+                .build();
+
+        TestDto testDto = TestDto.builder()
+                .name("Test")
+                .questions(Set.of(question1, question2))
+                .build();
+
+        String testId = "qwer-1234";
+        Test test = Test.builder().id(testId).subject(subject).name("First test").build();
+
+        // when
+        when(subjectService.getSubjectEntityAndVerifyEducator(subjectId, user)).thenReturn(subject);
+        when(testRepository.findByIdAndSubject(testId, subject)).thenReturn(Optional.of(test));
+
+        // then
+        assertThrows(IllegalStateException.class, () -> testService.updateTest(subjectId, testId, testDto, user));
+        verify(subjectService).getSubjectEntityAndVerifyEducator(subjectId, user);
+        verify(testRepository).findByIdAndSubject(testId, subject);
+    }
+
+    @org.junit.jupiter.api.Test
+    void whenUpdateTest_givenTestDoesnt_thenThrowException() {
+        // given
+        String subjectId = "1234-qwer";
+
+        User user = User.builder().id("qwer-1234").email("j.doe@mail.com").role(UserRole.EDUCATOR).build();
+        Subject subject = Subject.builder().id(subjectId).educator(user).build();
+
+        TestDto testDto = TestDto.builder()
+                .name("Test")
+                .build();
+
+        String testId = "qwer-1234";
+
+        // when
+        when(subjectService.getSubjectEntityAndVerifyEducator(subjectId, user)).thenReturn(subject);
+        when(testRepository.findByIdAndSubject(testId, subject)).thenReturn(Optional.empty());
+
+        // then
+        assertThrows(ResourceNotFoundException.class, () -> testService.updateTest(subjectId, testId, testDto, user));
+        verify(subjectService).getSubjectEntityAndVerifyEducator(subjectId, user);
+        verify(testRepository).findByIdAndSubject(testId, subject);
+    }
+
+    @org.junit.jupiter.api.Test
+    void whenUpdateTest_givenSubjectDoesntExist_thenThrowException() {
+        // given
+        String subjectId = "1234-qwer";
+
+        User user = User.builder().id("qwer-1234").email("j.doe@mail.com").role(UserRole.EDUCATOR).build();
+
+        String testId = "qwer-1234";
+        TestDto testDto = TestDto.builder()
+                .name("Test")
+                .build();
+
+        // when
+        when(subjectService.getSubjectEntityAndVerifyEducator(subjectId, user)).thenThrow(ResourceNotFoundException.class);
+
+        // then
+        assertThrows(ResourceNotFoundException.class, () -> testService.updateTest(subjectId, testId, testDto, user));
+        verify(subjectService).getSubjectEntityAndVerifyEducator(subjectId, user);
+    }
+
+    @org.junit.jupiter.api.Test
+    void whenUpdateTest_givenUserIsNotEducatorOfGivenSubject_thenThrowException() {
+        // given
+        String subjectId = "1234-qwer";
+
+        User user = User.builder().id("qwer-1234").email("j.doe@mail.com").role(UserRole.EDUCATOR).build();
+
+        String testId = "qwer-1234";
+        TestDto testDto = TestDto.builder()
+                .name("Test")
+                .build();
+
+        // when
+        when(subjectService.getSubjectEntityAndVerifyEducator(subjectId, user)).thenThrow(ForbiddenException.class);
+
+        // then
+        assertThrows(ForbiddenException.class, () -> testService.updateTest(subjectId, testId, testDto, user));
+        verify(subjectService).getSubjectEntityAndVerifyEducator(subjectId, user);
+    }
 }

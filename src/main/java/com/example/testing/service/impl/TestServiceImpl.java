@@ -1,5 +1,6 @@
 package com.example.testing.service.impl;
 
+import com.example.testing.exceptions.ResourceNotFoundException;
 import com.example.testing.model.Subject;
 import com.example.testing.model.User;
 import com.example.testing.model.test.Option;
@@ -56,6 +57,31 @@ public class TestServiceImpl implements TestService {
         test.setQuestions(questions);
 
         // save test
+        test = testRepository.save(test);
+        return mapTestToTestDto(test);
+    }
+
+    @Override
+    public TestDto updateTest(String subjectId, String testId, TestDto req, User user) {
+        log.debug("Update test with subject id {} and test id {}. Update data: {}", subjectId, testId, req);
+
+        Subject subject = subjectService.getSubjectEntityAndVerifyEducator(subjectId, user);
+
+        // fetch test
+        Test test = testRepository.findByIdAndSubject(testId, subject)
+                .orElseThrow(() -> new ResourceNotFoundException("test", "id", testId));
+
+        // TODO: verify that no one has already taken the test
+
+        // update test properties
+        test.setName(req.getName());
+        test.setUpdatedAt(LocalDateTime.now());
+
+        // map questions
+        Set<Question> questions = createQuestions(req.getQuestions(), test);
+        test.setQuestions(questions);
+
+        // save updated test
         test = testRepository.save(test);
         return mapTestToTestDto(test);
     }

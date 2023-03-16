@@ -17,4 +17,15 @@ public interface TestService {
      * @return saved test
      */
     TestDto saveTest(String subjectId, TestDto req, User user);
+
+    /**
+     * Update given test
+     *
+     * @param subjectId id of the subject
+     * @param testId    id of the test
+     * @param req       request payload
+     * @param user      authenticated user
+     * @return updated test
+     */
+    TestDto updateTest(String subjectId, String testId, TestDto req, User user);
 }
