@@ -25,4 +25,12 @@ public class TestController {
     ) {
         return testService.saveTest(subjectId, req, user);
     }
+
+    @PutMapping("{testId}")
+    TestDto updateTest(
+            @PathVariable String subjectId, @PathVariable String testId,
+            @RequestBody @Valid TestDto req, @AuthenticationPrincipal User user
+    ) {
+        return testService.updateTest(subjectId, testId, req, user);
+    }
 }
