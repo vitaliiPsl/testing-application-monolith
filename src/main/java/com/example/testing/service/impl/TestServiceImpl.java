@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -32,15 +33,6 @@ public class TestServiceImpl implements TestService {
     private final TestRepository testRepository;
     private final SubjectService subjectService;
     private final ModelMapper mapper;
-
-    private static Test createTest(TestDto testDto, Subject subject) {
-        return Test.builder()
-                .subject(subject)
-                .name(testDto.getName())
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
-                .build();
-    }
 
     @Override
     public TestDto saveTest(String subjectId, TestDto req, User user) {
@@ -96,10 +88,41 @@ public class TestServiceImpl implements TestService {
         Test test = testRepository.findByIdAndSubjectAndDeletedAtIsNull(testId, subject)
                 .orElseThrow(() -> new ResourceNotFoundException("test", "id", testId));
 
-        // set soft deletion
+        // set soft deletion timestamp
         test.setDeletedAt(LocalDateTime.now());
 
         testRepository.save(test);
+    }
+
+    @Override
+    public TestDto getTestById(String subjectId, String testId) {
+        log.debug("Get test with id: {}", testId);
+
+        Subject subject = subjectService.getSubjectEntity(subjectId);
+
+        Test test = testRepository.findByIdAndSubjectAndDeletedAtIsNull(testId, subject)
+                .orElseThrow(() -> new ResourceNotFoundException("test", "id", testId));
+
+        return mapTestToTestDto(test);
+    }
+
+    @Override
+    public List<TestDto> getTestsBySubjectId(String subjectId) {
+        log.debug("Get tests by subject with id: {}", subjectId);
+
+        Subject subject = subjectService.getSubjectEntity(subjectId);
+
+        return testRepository.findBySubjectAndDeletedAtIsNull(subject)
+                .stream().map(this::mapTestToTestDto).collect(Collectors.toList());
+    }
+
+    private static Test createTest(TestDto testDto, Subject subject) {
+        return Test.builder()
+                .subject(subject)
+                .name(testDto.getName())
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
     }
 
     private Set<Question> createQuestions(Set<QuestionDto> questionDtos, Test test) {

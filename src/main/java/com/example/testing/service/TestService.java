@@ -3,6 +3,8 @@ package com.example.testing.service;
 import com.example.testing.model.User;
 import com.example.testing.payload.test.TestDto;
 
+import java.util.List;
+
 /**
  * Test service
  */
@@ -37,4 +39,21 @@ public interface TestService {
      * @param user      authenticated user
      */
     void deleteTest(String subjectId, String testId, User user);
+
+    /**
+     * Get test with given id
+     *
+     * @param subjectId id of the subject
+     * @param testId    id of the test
+     * @return retrieved test
+     */
+    TestDto getTestById(String subjectId, String testId);
+
+    /**
+     * Get tests for given subjects
+     *
+     * @param subjectId id of the subject
+     * @return retrieved tests
+     */
+    List<TestDto> getTestsBySubjectId(String subjectId);
 }

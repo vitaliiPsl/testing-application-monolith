@@ -500,4 +500,123 @@ class TestServiceImplTest {
         assertThrows(ForbiddenException.class, () -> testService.deleteTest(subjectId, testId, user));
         verify(subjectService).getSubjectEntityAndVerifyEducator(subjectId, user);
     }
+
+    // FETCH
+    @org.junit.jupiter.api.Test
+    void whenGetTestById_givenTestExist_thenReturnTest() {
+        // given
+        String subjectId = "1234-qwer";
+
+        Subject subject = Subject.builder().id(subjectId).build();
+
+        String testId = "qwer-1234";
+        Test test = Test.builder().id(testId).subject(subject).name("First test").build();
+
+        // when
+        when(subjectService.getSubjectEntity(subjectId)).thenReturn(subject);
+        when(testRepository.findByIdAndSubjectAndDeletedAtIsNull(testId, subject)).thenReturn(Optional.of(test));
+
+        TestDto res = testService.getTestById(subjectId, testId);
+
+        // then
+        verify(subjectService).getSubjectEntity(subjectId);
+        verify(testRepository).findByIdAndSubjectAndDeletedAtIsNull(testId, subject);
+
+        assertThat(res.getId(), is(test.getId()));
+        assertThat(res.getName(), is(test.getName()));
+    }
+
+    @org.junit.jupiter.api.Test
+    void whenGetTestById_givenTestDoesntExist_thenThrowException() {
+        // given
+        String subjectId = "1234-qwer";
+
+        Subject subject = Subject.builder().id(subjectId).build();
+
+        String testId = "qwer-1234";
+
+        // when
+        when(subjectService.getSubjectEntity(subjectId)).thenReturn(subject);
+        when(testRepository.findByIdAndSubjectAndDeletedAtIsNull(testId, subject)).thenReturn(Optional.empty());
+
+        // then
+        assertThrows(ResourceNotFoundException.class, () -> testService.getTestById(subjectId, testId));
+        verify(subjectService).getSubjectEntity(subjectId);
+        verify(testRepository).findByIdAndSubjectAndDeletedAtIsNull(testId, subject);
+    }
+
+    @org.junit.jupiter.api.Test
+    void whenGetTestById_givenSubjectDoesntExist_thenThrowException() {
+        // given
+        String subjectId = "1234-qwer";
+
+        String testId = "qwer-1234";
+
+        // when
+        when(subjectService.getSubjectEntity(subjectId)).thenThrow(ResourceNotFoundException.class);
+
+        // then
+        assertThrows(ResourceNotFoundException.class, () -> testService.getTestById(subjectId, testId));
+        verify(subjectService).getSubjectEntity(subjectId);
+    }
+
+    @org.junit.jupiter.api.Test
+    void whenGetTestsBySubjectId_givenTestsWithGivenSubjectIdExist_thenReturnTests() {
+        // given
+        String subjectId = "1234-qwer";
+
+        Subject subject = Subject.builder().id(subjectId).build();
+
+        List<Test> tests = List.of(
+                Test.builder().id("1234").subject(subject).name("First test").build(),
+                Test.builder().id("4321").subject(subject).name("Second test").build()
+        );
+
+        // when
+        when(subjectService.getSubjectEntity(subjectId)).thenReturn(subject);
+        when(testRepository.findBySubjectAndDeletedAtIsNull(subject)).thenReturn(tests);
+
+        List<TestDto> res = testService.getTestsBySubjectId(subjectId);
+
+        // then
+        verify(subjectService).getSubjectEntity(subjectId);
+        verify(testRepository).findBySubjectAndDeletedAtIsNull(subject);
+
+        assertThat(res, hasSize(2));
+    }
+
+    @org.junit.jupiter.api.Test
+    void whenGetTestsBySubjectId_givenTestsWithGivenSubjectIdDoesntExist_thenReturnEmptyList() {
+        // given
+        String subjectId = "1234-qwer";
+
+        Subject subject = Subject.builder().id(subjectId).build();
+
+        List<Test> tests = List.of();
+
+        // when
+        when(subjectService.getSubjectEntity(subjectId)).thenReturn(subject);
+        when(testRepository.findBySubjectAndDeletedAtIsNull(subject)).thenReturn(tests);
+
+        List<TestDto> res = testService.getTestsBySubjectId(subjectId);
+
+        // then
+        verify(subjectService).getSubjectEntity(subjectId);
+        verify(testRepository).findBySubjectAndDeletedAtIsNull(subject);
+
+        assertThat(res, hasSize(0));
+    }
+
+    @org.junit.jupiter.api.Test
+    void whenGetTestsBySubjectId_givenSubjectDoesntExist_thenThrowException() {
+        // given
+        String subjectId = "1234-qwer";
+
+        // when
+        when(subjectService.getSubjectEntity(subjectId)).thenThrow(ResourceNotFoundException.class);
+
+        // then
+        assertThrows(ResourceNotFoundException.class, () -> testService.getTestsBySubjectId(subjectId));
+        verify(subjectService).getSubjectEntity(subjectId);
+    }
 }
