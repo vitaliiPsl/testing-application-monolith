@@ -11,7 +11,7 @@ import org.hibernate.validator.constraints.Length;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
-import java.util.HashSet;
+import java.util.Set;
 
 @Data
 @Builder
@@ -32,7 +32,7 @@ public class TestDto {
 
     @JsonProperty(access = JsonProperty.Access.READ_WRITE)
     @Size(min = 2, message = "Test must contain at least two distinct questions")
-    private HashSet<QuestionDto> questions;
+    private Set<QuestionDto> questions;
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private LocalDateTime createdAt;
