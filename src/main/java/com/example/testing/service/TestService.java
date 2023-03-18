@@ -1,6 +1,7 @@
 package com.example.testing.service;
 
 import com.example.testing.model.User;
+import com.example.testing.model.test.Test;
 import com.example.testing.payload.test.TestDto;
 
 import java.util.List;
@@ -56,4 +57,13 @@ public interface TestService {
      * @return retrieved tests
      */
     List<TestDto> getTestsBySubjectId(String subjectId);
+
+    /**
+     * Get test entity
+     *
+     * @param subjectId id of the subject
+     * @param testId    id of the test
+     * @return fetched test entity
+     */
+    Test getTestEntity(String subjectId, String testId);
 }

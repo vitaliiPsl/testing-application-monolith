@@ -53,7 +53,7 @@ class TestServiceImplTest {
         Subject subject = Subject.builder().id(subjectId).educator(user).build();
 
         QuestionDto question1 = QuestionDto.builder()
-                .question("What is correct answer for question 1?")
+                .question("What is the correct answer to question 1?")
                 .options(Set.of(
                         OptionDto.builder().option("a").build(),
                         OptionDto.builder().option("b").correct(true).build()
@@ -61,7 +61,7 @@ class TestServiceImplTest {
                 .build();
 
         QuestionDto question2 = QuestionDto.builder()
-                .question("What is correct answer for question 2?")
+                .question("What is the correct answer to question 2?")
                 .options(Set.of(
                         OptionDto.builder().option("a").build(),
                         OptionDto.builder().option("b").correct(true).build()
@@ -107,7 +107,7 @@ class TestServiceImplTest {
         Subject subject = Subject.builder().id(subjectId).educator(user).build();
 
         QuestionDto question1 = QuestionDto.builder()
-                .question("What is correct answer for question 1?")
+                .question("What is the correct answer to question 1?")
                 .options(Set.of(
                         OptionDto.builder().option("a").build(),
                         OptionDto.builder().option("b").correct(true).build()
@@ -115,7 +115,7 @@ class TestServiceImplTest {
                 .build();
 
         QuestionDto question2 = QuestionDto.builder()
-                .question("What is correct answer for question 2?")
+                .question("What is the correct answer to question 2?")
                 .options(Set.of(
                         OptionDto.builder().option("a").build(),
                         OptionDto.builder().option("b").build()
@@ -145,14 +145,14 @@ class TestServiceImplTest {
         Subject subject = Subject.builder().id(subjectId).educator(user).build();
 
         QuestionDto question1 = QuestionDto.builder()
-                .question("What is correct answer for question 1?")
+                .question("What is the correct answer to question 1?")
                 .options(Set.of(
                         OptionDto.builder().option("a").build()
                 ))
                 .build();
 
         QuestionDto question2 = QuestionDto.builder()
-                .question("What is correct answer for question 2?")
+                .question("What is the correct answer to question 2?")
                 .options(Set.of(
                         OptionDto.builder().option("a").build(),
                         OptionDto.builder().option("b").build()
@@ -221,7 +221,7 @@ class TestServiceImplTest {
         Subject subject = Subject.builder().id(subjectId).educator(user).build();
 
         QuestionDto question1 = QuestionDto.builder()
-                .question("What is correct answer for question 1?")
+                .question("What is the correct answer to question 1?")
                 .options(Set.of(
                         OptionDto.builder().option("a").build(),
                         OptionDto.builder().option("b").correct(true).build()
@@ -229,7 +229,7 @@ class TestServiceImplTest {
                 .build();
 
         QuestionDto question2 = QuestionDto.builder()
-                .question("What is correct answer for question 2?")
+                .question("What is the correct answer to question 2?")
                 .options(Set.of(
                         OptionDto.builder().option("a").build(),
                         OptionDto.builder().option("b").correct(true).build()
@@ -281,7 +281,7 @@ class TestServiceImplTest {
         Subject subject = Subject.builder().id(subjectId).educator(user).build();
 
         QuestionDto question1 = QuestionDto.builder()
-                .question("What is correct answer for question 1?")
+                .question("What is the correct answer to question 1?")
                 .options(Set.of(
                         OptionDto.builder().option("a").build(),
                         OptionDto.builder().option("b").correct(true).build()
@@ -289,7 +289,7 @@ class TestServiceImplTest {
                 .build();
 
         QuestionDto question2 = QuestionDto.builder()
-                .question("What is correct answer for question 2?")
+                .question("What is the correct answer to question 2?")
                 .options(Set.of(
                         OptionDto.builder().option("a").build(),
                         OptionDto.builder().option("b").build()
@@ -323,14 +323,14 @@ class TestServiceImplTest {
         Subject subject = Subject.builder().id(subjectId).educator(user).build();
 
         QuestionDto question1 = QuestionDto.builder()
-                .question("What is correct answer for question 1?")
+                .question("What is the correct answer to question 1?")
                 .options(Set.of(
                         OptionDto.builder().option("a").build()
                 ))
                 .build();
 
         QuestionDto question2 = QuestionDto.builder()
-                .question("What is correct answer for question 2?")
+                .question("What is the correct answer to question 2?")
                 .options(Set.of(
                         OptionDto.builder().option("a").build(),
                         OptionDto.builder().option("b").build()
@@ -617,6 +617,45 @@ class TestServiceImplTest {
 
         // then
         assertThrows(ResourceNotFoundException.class, () -> testService.getTestsBySubjectId(subjectId));
+        verify(subjectService).getSubjectEntity(subjectId);
+    }
+
+    @org.junit.jupiter.api.Test
+    void whenGetTestEntity_givenTestExists_thenReturnTestEntity() {
+        // given
+        String subjectId = "1234-qwer";
+
+        Subject subject = Subject.builder().id(subjectId).build();
+
+        String testId = "qwer-1234";
+        Test test = Test.builder().id(testId).subject(subject).name("First test").build();
+
+        // when
+        when(subjectService.getSubjectEntity(subjectId)).thenReturn(subject);
+        when(testRepository.findByIdAndSubjectAndDeletedAtIsNull(testId, subject)).thenReturn(Optional.of(test));
+
+        Test res = testService.getTestEntity(subjectId, testId);
+
+        // then
+        verify(subjectService).getSubjectEntity(subjectId);
+        verify(testRepository).findByIdAndSubjectAndDeletedAtIsNull(testId, subject);
+
+        assertThat(res.getId(), is(test.getId()));
+        assertThat(res.getName(), is(test.getName()));
+    }
+
+    @org.junit.jupiter.api.Test
+    void whenGetTestEntity_givenTestDoesntExists_thenThrowException() {
+        // given
+        String subjectId = "1234-qwer";
+
+        String testId = "qwer-1234";
+
+        // when
+        when(subjectService.getSubjectEntity(subjectId)).thenThrow(ResourceNotFoundException.class);
+
+        // then
+        assertThrows(ResourceNotFoundException.class, () -> testService.getTestById(subjectId, testId));
         verify(subjectService).getSubjectEntity(subjectId);
     }
 }

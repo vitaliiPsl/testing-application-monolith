@@ -116,6 +116,14 @@ public class TestServiceImpl implements TestService {
                 .stream().map(this::mapTestToTestDto).collect(Collectors.toList());
     }
 
+    @Override
+    public Test getTestEntity(String subjectId, String testId) {
+        Subject subject = subjectService.getSubjectEntity(subjectId);
+
+        return testRepository.findByIdAndSubjectAndDeletedAtIsNull(testId, subject)
+                .orElseThrow(() -> new ResourceNotFoundException("test", "id", testId));
+    }
+
     private static Test createTest(TestDto testDto, Subject subject) {
         return Test.builder()
                 .subject(subject)
