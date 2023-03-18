@@ -1,7 +1,10 @@
 package com.example.testing.controller;
 
 import com.example.testing.model.User;
+import com.example.testing.payload.attempt.AttemptDto;
+import com.example.testing.payload.attempt.AttemptResultDto;
 import com.example.testing.payload.test.TestDto;
+import com.example.testing.service.AttemptService;
 import com.example.testing.service.TestService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,6 +20,7 @@ import java.util.List;
 public class TestController {
 
     private final TestService testService;
+    private final AttemptService attemptService;
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
@@ -52,5 +56,15 @@ public class TestController {
     @GetMapping
     List<TestDto> getTestById(@PathVariable String subjectId) {
         return testService.getTestsBySubjectId(subjectId);
+    }
+
+    @PostMapping("{testId}/attempts")
+    AttemptResultDto takeTest(
+            @PathVariable String subjectId,
+            @PathVariable String testId,
+            @RequestBody @Valid AttemptDto attemptDto,
+            @AuthenticationPrincipal User user
+    ) {
+        return attemptService.processAttempt(subjectId, testId, attemptDto, user);
     }
 }
