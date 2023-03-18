@@ -27,6 +27,7 @@ public class WebSecurityConfig {
 
         http.authorizeRequests()
                 .antMatchers("/api/auth/**").permitAll()
+                .antMatchers(HttpMethod.POST, "/api/subjects/**/tests/**/attempts").authenticated()
                 .antMatchers(HttpMethod.POST, "/api/subjects", "/api/subjects/**").hasRole("EDUCATOR")
                 .antMatchers(HttpMethod.PUT, "/api/subjects", "/api/subjects/**").hasRole("EDUCATOR")
                 .antMatchers(HttpMethod.DELETE, "/api/subjects", "/api/subjects/**").hasRole("EDUCATOR")
