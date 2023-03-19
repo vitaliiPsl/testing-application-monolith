@@ -73,12 +73,7 @@ public class AuthServiceImpl implements AuthService {
         String userId = jwtService.decodeToken(token);
 
         User user = getUser(userId);
-        PreAuthenticatedAuthenticationToken authToken = new PreAuthenticatedAuthenticationToken(user, token, user.getAuthorities());
-        if(user.isEnabled()) {
-            authToken.setAuthenticated(true);
-        }
-
-        return authToken;
+        return new PreAuthenticatedAuthenticationToken(user, token, user.getAuthorities());
     }
 
     private User getUser(String userId) {

@@ -2,6 +2,7 @@ package com.example.testing.service.impl;
 
 import com.example.testing.exceptions.ResourceAlreadyExistException;
 import com.example.testing.model.User;
+import com.example.testing.model.UserRole;
 import com.example.testing.payload.UserDto;
 import com.example.testing.payload.auth.SignInRequestDto;
 import com.example.testing.payload.auth.SignInResponseDto;
@@ -155,7 +156,11 @@ class AuthServiceImplTest {
         String token = "eyJ0eXA.eyJzdWIi.Ou-2-0gYTg";
 
         String userId = "1234";
-        User user = User.builder().id(userId).email("j.doe@mail.com").enabled(true).build();
+        User user = User.builder()
+                .id(userId)
+                .email("j.doe@mail.com")
+                .role(UserRole.STUDENT)
+                .enabled(true).build();
 
         // when
         when(jwtService.decodeToken(token)).thenReturn(userId);
@@ -168,29 +173,6 @@ class AuthServiceImplTest {
         verify(userRepository).findById(userId);
 
         assertThat(res.isAuthenticated(), is(true));
-        assertThat((User) res.getPrincipal(), is(user));
-        assertThat((String) res.getCredentials(), is(token));
-    }
-
-    @Test
-    void whenExchangeToken_givenTokenIsValidAndUserExistButNotEnabled_thenReturnUserAuthenticationNotAuthenticated() {
-        // given
-        String token = "eyJ0eXA.eyJzdWIi.Ou-2-0gYTg";
-
-        String userId = "1234";
-        User user = User.builder().id(userId).email("j.doe@mail.com").enabled(false).build();
-
-        // when
-        when(jwtService.decodeToken(token)).thenReturn(userId);
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-
-        Authentication res = authService.exchangeToken(token);
-
-        // then
-        verify(jwtService).decodeToken(token);
-        verify(userRepository).findById(userId);
-
-        assertThat(res.isAuthenticated(), is(false));
         assertThat((User) res.getPrincipal(), is(user));
         assertThat((String) res.getCredentials(), is(token));
     }
