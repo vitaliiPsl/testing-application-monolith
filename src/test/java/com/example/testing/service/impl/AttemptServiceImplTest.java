@@ -330,7 +330,7 @@ class AttemptServiceImplTest {
         // then
         verify(attemptRepository).findById(attemptId);
         assertThat(res.getId(), is(attemptId));
-        assertThat(res.getUser().getId(), is(user.getId()));
+        assertThat(res.getUserId(), is(user.getId()));
         assertThat(res.getScore(), is(attemptResult.getScore()));
     }
 
@@ -357,7 +357,7 @@ class AttemptServiceImplTest {
         // then
         verify(attemptRepository).findById(attemptId);
         assertThat(res.getId(), is(attemptId));
-        assertThat(res.getUser().getId(), is(user.getId()));
+        assertThat(res.getUserId(), is(user.getId()));
         assertThat(res.getScore(), is(attemptResult.getScore()));
     }
 

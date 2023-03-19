@@ -13,16 +13,15 @@ import java.util.Set;
 @Entity
 @Table(name = "attempt_questions")
 public class AttemptQuestion {
-    @ManyToOne
-    AttemptResult attempt;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @ManyToOne
     private Question question;
 
     @EqualsAndHashCode.Exclude
-    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL)
     private Set<AttemptAnswer> answers;
 
     private Integer score;

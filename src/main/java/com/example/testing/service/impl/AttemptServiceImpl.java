@@ -60,7 +60,6 @@ public class AttemptServiceImpl implements AttemptService {
         int score = 0;
         int maxScore = 0;
         for (var question : attemptQuestions) {
-            question.setAttempt(attempt);
             score += question.getScore();
             maxScore += question.getMaxScore();
         }
@@ -134,7 +133,6 @@ public class AttemptServiceImpl implements AttemptService {
         // set answer question and count correct answers
         int correctAnswers = 0;
         for (var answer : answers) {
-            answer.setQuestion(attemptQuestion);
             correctAnswers += answer.isCorrect() ? 1 : 0;
         }
 

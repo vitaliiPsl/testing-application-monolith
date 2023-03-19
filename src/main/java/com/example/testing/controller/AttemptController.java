@@ -22,10 +22,10 @@ public class AttemptController {
         return attemptService.getAttemptById(attemptId, user);
     }
 
-    @GetMapping()
-    List<AttemptResultDto> getAttemptsByTestId(@RequestParam(required = false) String attemptId, @AuthenticationPrincipal User user) {
-        if(attemptId != null) {
-            return attemptService.getAttemptsByTestId(attemptId, user);
+    @GetMapping
+    List<AttemptResultDto> getAttemptsByTestId(@RequestParam(required = false) String testId, @AuthenticationPrincipal User user) {
+        if(testId != null) {
+            return attemptService.getAttemptsByTestId(testId, user);
         }
 
         return attemptService.getAttemptsByUser(user);

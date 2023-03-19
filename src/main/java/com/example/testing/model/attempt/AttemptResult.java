@@ -28,7 +28,7 @@ public class AttemptResult {
     private Test test;
 
     @EqualsAndHashCode.Exclude
-    @OneToMany(mappedBy = "attempt", cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL)
     private Set<AttemptQuestion> attemptQuestions;
 
     private Integer score;

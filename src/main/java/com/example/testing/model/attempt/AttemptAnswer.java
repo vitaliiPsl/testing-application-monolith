@@ -20,9 +20,6 @@ public class AttemptAnswer {
     private Long id;
 
     @ManyToOne
-    private AttemptQuestion question;
-
-    @ManyToOne
     private Option option;
 
     private boolean correct;
