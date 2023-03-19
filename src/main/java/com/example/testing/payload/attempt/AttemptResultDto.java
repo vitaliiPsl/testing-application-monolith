@@ -21,10 +21,10 @@ public class AttemptResultDto {
     private String id;
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    private UserDto user;
+    private String userId;
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    private TestDto test;
+    private String testId;
 
     @JsonProperty(access = JsonProperty.Access.READ_WRITE)
     private Set<AttemptQuestionDto> attemptQuestions = new HashSet<>();
