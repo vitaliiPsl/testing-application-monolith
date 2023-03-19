@@ -28,9 +28,9 @@ public class WebSecurityConfig {
         http.authorizeRequests()
                 .antMatchers("/api/auth/**").permitAll()
                 .antMatchers(HttpMethod.POST, "/api/subjects/**/tests/**/attempts").authenticated()
-                .antMatchers(HttpMethod.POST, "/api/subjects", "/api/subjects/**").hasRole("EDUCATOR")
-                .antMatchers(HttpMethod.PUT, "/api/subjects", "/api/subjects/**").hasRole("EDUCATOR")
-                .antMatchers(HttpMethod.DELETE, "/api/subjects", "/api/subjects/**").hasRole("EDUCATOR")
+                .antMatchers(HttpMethod.POST, "/api/subjects", "/api/tests").hasRole("EDUCATOR")
+                .antMatchers(HttpMethod.PUT, "/api/subjects", "/api/tests").hasRole("EDUCATOR")
+                .antMatchers(HttpMethod.DELETE, "/api/subjects", "/api/tests").hasRole("EDUCATOR")
                 .anyRequest().authenticated();
 
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
