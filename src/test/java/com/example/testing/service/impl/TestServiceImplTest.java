@@ -5,6 +5,7 @@ import com.example.testing.exceptions.ResourceNotFoundException;
 import com.example.testing.model.Subject;
 import com.example.testing.model.User;
 import com.example.testing.model.UserRole;
+import com.example.testing.model.attempt.AttemptResult;
 import com.example.testing.model.test.Question;
 import com.example.testing.model.test.Test;
 import com.example.testing.payload.test.OptionDto;
@@ -305,6 +306,52 @@ class TestServiceImplTest {
 
         String testId = "qwer-1234";
         Test test = Test.builder().id(testId).subject(subject).name("First test").build();
+
+        // when
+        when(testRepository.findById(testId)).thenReturn(Optional.of(test));
+
+        // then
+        assertThrows(IllegalStateException.class, () -> testService.updateTest(testId, testDto, user));
+        verify(testRepository).findById(testId);
+    }
+
+    @org.junit.jupiter.api.Test
+    void whenUpdateTest_givenTestHasBeenAlreadyTaken_thenThrowException() {
+        // given
+        String subjectId = "1234-qwer";
+
+        User user = User.builder().id("qwer-1234").email("j.doe@mail.com").role(UserRole.EDUCATOR).build();
+        Subject subject = Subject.builder().id(subjectId).educator(user).build();
+
+        QuestionDto question1 = QuestionDto.builder()
+                .question("What is the correct answer to question 1?")
+                .options(Set.of(
+                        OptionDto.builder().option("a").build(),
+                        OptionDto.builder().option("b").correct(true).build()
+                ))
+                .build();
+
+        QuestionDto question2 = QuestionDto.builder()
+                .question("What is the correct answer to question 2?")
+                .options(Set.of(
+                        OptionDto.builder().option("a").build(),
+                        OptionDto.builder().option("b").build()
+                ))
+                .build();
+
+        TestDto testDto = TestDto.builder()
+                .name("Test")
+                .subjectId(subjectId)
+                .questions(Set.of(question1, question2))
+                .build();
+
+        String testId = "qwer-1234";
+        Test test = Test.builder()
+                .id(testId)
+                .subject(subject)
+                .name("First test")
+                .attempts(Set.of(AttemptResult.builder().id("1234").build()))
+                .build();
 
         // when
         when(testRepository.findById(testId)).thenReturn(Optional.of(test));

@@ -68,7 +68,10 @@ public class TestServiceImpl implements TestService {
             throw new ForbiddenException("Not an educator of the subject: " + test.getSubject().getId());
         }
 
-        // TODO: verify that no one has already taken the test
+        if (test.getAttempts().size() != 0) {
+            log.error("There are already test attempts");
+            throw new IllegalStateException("Test has been already taken");
+        }
 
         // update test properties
         test.setName(req.getName());
