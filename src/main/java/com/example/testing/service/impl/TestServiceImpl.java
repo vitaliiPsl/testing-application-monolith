@@ -1,5 +1,6 @@
 package com.example.testing.service.impl;
 
+import com.example.testing.exceptions.ForbiddenException;
 import com.example.testing.exceptions.ResourceNotFoundException;
 import com.example.testing.model.Subject;
 import com.example.testing.model.User;
@@ -35,11 +36,11 @@ public class TestServiceImpl implements TestService {
     private final ModelMapper mapper;
 
     @Override
-    public TestDto saveTest(String subjectId, TestDto req, User user) {
-        log.debug("Save test {} for subject {}", req, subjectId);
+    public TestDto saveTest(TestDto req, User user) {
+        log.debug("Save test {}", req);
 
         // get subject
-        Subject subject = subjectService.getSubjectEntityAndVerifyEducator(subjectId, user);
+        Subject subject = subjectService.getSubjectEntityAndVerifyEducator(req.getSubjectId(), user);
 
         // map test dto to test
         Test test = createTest(req, subject);
@@ -54,14 +55,18 @@ public class TestServiceImpl implements TestService {
     }
 
     @Override
-    public TestDto updateTest(String subjectId, String testId, TestDto req, User user) {
-        log.debug("Update test with subject id {} and test id {}. Update data: {}", subjectId, testId, req);
-
-        Subject subject = subjectService.getSubjectEntityAndVerifyEducator(subjectId, user);
+    public TestDto updateTest(String testId, TestDto req, User user) {
+        log.debug("Update test with id {}. Update data: {}", testId, req);
 
         // fetch test
-        Test test = testRepository.findByIdAndSubjectAndDeletedAtIsNull(testId, subject)
+        Test test = testRepository.findByIdAndDeletedAtIsNull(testId)
                 .orElseThrow(() -> new ResourceNotFoundException("test", "id", testId));
+
+        // verify that user is the educator of the test subject
+        if(!test.getSubject().getEducator().equals(user)) {
+            log.error("User is not an educator of the subject: {}", test.getSubject());
+            throw new ForbiddenException("Not an educator of the subject: " + test.getSubject().getId());
+        }
 
         // TODO: verify that no one has already taken the test
 
@@ -79,14 +84,18 @@ public class TestServiceImpl implements TestService {
     }
 
     @Override
-    public void deleteTest(String subjectId, String testId, User user) {
-        log.debug("Delete test with subject id {} and test id {}", subjectId, testId);
-
-        Subject subject = subjectService.getSubjectEntityAndVerifyEducator(subjectId, user);
+    public void deleteTest(String testId, User user) {
+        log.debug("Delete test with id {}", testId);
 
         // fetch test
-        Test test = testRepository.findByIdAndSubjectAndDeletedAtIsNull(testId, subject)
+        Test test = testRepository.findByIdAndDeletedAtIsNull(testId)
                 .orElseThrow(() -> new ResourceNotFoundException("test", "id", testId));
+
+        // verify that user is the educator of the test subject
+        if(!test.getSubject().getEducator().equals(user)) {
+            log.error("User is not an educator of the subject: {}", test.getSubject());
+            throw new ForbiddenException("Not an educator of the subject: " + test.getSubject().getId());
+        }
 
         // set soft deletion timestamp
         test.setDeletedAt(LocalDateTime.now());
@@ -95,12 +104,10 @@ public class TestServiceImpl implements TestService {
     }
 
     @Override
-    public TestDto getTestById(String subjectId, String testId) {
+    public TestDto getTestById(String testId) {
         log.debug("Get test with id: {}", testId);
 
-        Subject subject = subjectService.getSubjectEntity(subjectId);
-
-        Test test = testRepository.findByIdAndSubjectAndDeletedAtIsNull(testId, subject)
+        Test test = testRepository.findByIdAndDeletedAtIsNull(testId)
                 .orElseThrow(() -> new ResourceNotFoundException("test", "id", testId));
 
         return mapTestToTestDto(test);
@@ -117,10 +124,8 @@ public class TestServiceImpl implements TestService {
     }
 
     @Override
-    public Test getTestEntity(String subjectId, String testId) {
-        Subject subject = subjectService.getSubjectEntity(subjectId);
-
-        return testRepository.findByIdAndSubjectAndDeletedAtIsNull(testId, subject)
+    public Test getTestEntity(String testId) {
+        return testRepository.findByIdAndDeletedAtIsNull(testId)
                 .orElseThrow(() -> new ResourceNotFoundException("test", "id", testId));
     }
 
