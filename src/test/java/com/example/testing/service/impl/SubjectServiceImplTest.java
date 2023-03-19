@@ -102,13 +102,13 @@ class SubjectServiceImplTest {
                 .educator(user).build();
 
         // when
-        when(subjectRepository.findByIdAndDeletedAtIsNull(subjectId)).thenReturn(Optional.of(existing));
+        when(subjectRepository.findById(subjectId)).thenReturn(Optional.of(existing));
         when(subjectRepository.save(Mockito.any(Subject.class))).then(AdditionalAnswers.returnsFirstArg());
 
         SubjectDto res = subjectService.updateSubject(subjectId, subjectDto, user);
 
         // then
-        verify(subjectRepository).findByIdAndDeletedAtIsNull(subjectId);
+        verify(subjectRepository).findById(subjectId);
         verify(subjectRepository).save(subjectCaptor.capture());
 
         Subject subject = subjectCaptor.getValue();
@@ -138,11 +138,11 @@ class SubjectServiceImplTest {
                 .educator(educator).build();
 
         // when
-        when(subjectRepository.findByIdAndDeletedAtIsNull(subjectId)).thenReturn(Optional.of(existing));
+        when(subjectRepository.findById(subjectId)).thenReturn(Optional.of(existing));
 
         // then
         assertThrows(ForbiddenException.class, () -> subjectService.updateSubject(subjectId, subjectDto, user));
-        verify(subjectRepository).findByIdAndDeletedAtIsNull(subjectId);
+        verify(subjectRepository).findById(subjectId);
     }
 
 
@@ -158,16 +158,13 @@ class SubjectServiceImplTest {
                 .educator(user).build();
 
         // when
-        when(subjectRepository.findByIdAndDeletedAtIsNull(subjectId)).thenReturn(Optional.of(existing));
+        when(subjectRepository.findById(subjectId)).thenReturn(Optional.of(existing));
 
         subjectService.deleteSubject(subjectId, user);
 
         // then
-        verify(subjectRepository).findByIdAndDeletedAtIsNull(subjectId);
-        verify(subjectRepository).save(subjectCaptor.capture());
-
-        Subject subject = subjectCaptor.getValue();
-        assertThat(subject.getDeletedAt(), notNullValue());
+        verify(subjectRepository).findById(subjectId);
+        verify(subjectRepository).delete(existing);
     }
 
     @Test
@@ -185,12 +182,11 @@ class SubjectServiceImplTest {
                 .educator(educator).build();
 
         // when
-        when(subjectRepository.findByIdAndDeletedAtIsNull(subjectId)).thenReturn(Optional.of(existing));
+        when(subjectRepository.findById(subjectId)).thenReturn(Optional.of(existing));
 
         // then
         assertThrows(ForbiddenException.class, () -> subjectService.deleteSubject(subjectId, user));
-
-        verify(subjectRepository).findByIdAndDeletedAtIsNull(subjectId);
+        verify(subjectRepository).findById(subjectId);
     }
 
     @Test
@@ -201,12 +197,12 @@ class SubjectServiceImplTest {
         Subject subject = Subject.builder().id(subjectId).name("Whatever").build();
 
         // when
-        when(subjectRepository.findByIdAndDeletedAtIsNull(subjectId)).thenReturn(Optional.of(subject));
+        when(subjectRepository.findById(subjectId)).thenReturn(Optional.of(subject));
 
         SubjectDto res = subjectService.getSubjectById(subjectId);
 
         // then
-        verify(subjectRepository).findByIdAndDeletedAtIsNull(subjectId);
+        verify(subjectRepository).findById(subjectId);
         assertThat(res.getId(), is(subjectId));
         assertThat(res.getName(), is(subject.getName()));
     }
@@ -217,11 +213,11 @@ class SubjectServiceImplTest {
         String subjectId = "qwer-1234";
 
         // when
-        when(subjectRepository.findByIdAndDeletedAtIsNull(subjectId)).thenReturn(Optional.empty());
+        when(subjectRepository.findById(subjectId)).thenReturn(Optional.empty());
 
         // then
         assertThrows(ResourceNotFoundException.class, () -> subjectService.getSubjectById(subjectId));
-        verify(subjectRepository).findByIdAndDeletedAtIsNull(subjectId);
+        verify(subjectRepository).findById(subjectId);
     }
 
     @Test
@@ -233,11 +229,11 @@ class SubjectServiceImplTest {
         );
 
         // when
-        when(subjectRepository.findAllByDeletedAtIsNull()).thenReturn(subjects);
+        when(subjectRepository.findAll()).thenReturn(subjects);
         List<SubjectDto> res = subjectService.getAllSubjects();
 
         // then
-        verify(subjectRepository).findAllByDeletedAtIsNull();
+        verify(subjectRepository).findAll();
         assertThat(res, hasSize(subjects.size()));
     }
 
@@ -254,13 +250,13 @@ class SubjectServiceImplTest {
 
         // when
         when(userRepository.findByIdAndRole(educatorId, UserRole.EDUCATOR)).thenReturn(Optional.of(educator));
-        when(subjectRepository.findAllByEducatorAndDeletedAtIsNull(educator)).thenReturn(subjects);
+        when(subjectRepository.findAllByEducator(educator)).thenReturn(subjects);
 
         List<SubjectDto> res = subjectService.getSubjectsByEducatorId(educatorId);
 
         // then
         verify(userRepository).findByIdAndRole(educatorId, UserRole.EDUCATOR);
-        verify(subjectRepository).findAllByEducatorAndDeletedAtIsNull(educator);
+        verify(subjectRepository).findAllByEducator(educator);
 
         assertThat(res, hasSize(subjects.size()));
     }
@@ -285,12 +281,12 @@ class SubjectServiceImplTest {
         Subject subject = Subject.builder().id(subjectId).build();
 
         // when
-        when(subjectRepository.findByIdAndDeletedAtIsNull(subjectId)).thenReturn(Optional.of(subject));
+        when(subjectRepository.findById(subjectId)).thenReturn(Optional.of(subject));
 
         Subject res = subjectService.getSubjectEntity(subjectId);
 
         // then
-        verify(subjectRepository).findByIdAndDeletedAtIsNull(subjectId);
+        verify(subjectRepository).findById(subjectId);
         assertThat(res, is(subject));
     }
 
@@ -300,11 +296,11 @@ class SubjectServiceImplTest {
         String subjectId = "1234-qwer";
 
         // when
-        when(subjectRepository.findByIdAndDeletedAtIsNull(subjectId)).thenReturn(Optional.empty());
+        when(subjectRepository.findById(subjectId)).thenReturn(Optional.empty());
 
         // then
         assertThrows(ResourceNotFoundException.class, () -> subjectService.getSubjectEntity(subjectId));
-        verify(subjectRepository).findByIdAndDeletedAtIsNull(subjectId);
+        verify(subjectRepository).findById(subjectId);
     }
 
     @Test
@@ -317,12 +313,12 @@ class SubjectServiceImplTest {
         Subject subject = Subject.builder().id(subjectId).educator(user).build();
 
         // when
-        when(subjectRepository.findByIdAndDeletedAtIsNull(subjectId)).thenReturn(Optional.of(subject));
+        when(subjectRepository.findById(subjectId)).thenReturn(Optional.of(subject));
 
         Subject res = subjectService.getSubjectEntityAndVerifyEducator(subjectId, user);
 
         // then
-        verify(subjectRepository).findByIdAndDeletedAtIsNull(subjectId);
+        verify(subjectRepository).findById(subjectId);
         assertThat(res, is(subject));
     }
 
@@ -337,11 +333,11 @@ class SubjectServiceImplTest {
         Subject subject = Subject.builder().id(subjectId).educator(educator).build();
 
         // when
-        when(subjectRepository.findByIdAndDeletedAtIsNull(subjectId)).thenReturn(Optional.of(subject));
+        when(subjectRepository.findById(subjectId)).thenReturn(Optional.of(subject));
 
         // then
         assertThrows(ForbiddenException.class, () -> subjectService.getSubjectEntityAndVerifyEducator(subjectId, user));
-        verify(subjectRepository).findByIdAndDeletedAtIsNull(subjectId);
+        verify(subjectRepository).findById(subjectId);
     }
 
     @Test
@@ -351,11 +347,11 @@ class SubjectServiceImplTest {
         User user = User.builder().id("qwer-1234").email("j.doe@mail.com").role(UserRole.EDUCATOR).build();
 
         // when
-        when(subjectRepository.findByIdAndDeletedAtIsNull(subjectId)).thenReturn(Optional.empty());
+        when(subjectRepository.findById(subjectId)).thenReturn(Optional.empty());
 
         // then
         assertThrows(ResourceNotFoundException.class,
                 () -> subjectService.getSubjectEntityAndVerifyEducator(subjectId, user));
-        verify(subjectRepository).findByIdAndDeletedAtIsNull(subjectId);
+        verify(subjectRepository).findById(subjectId);
     }
 }

@@ -1,6 +1,7 @@
 package com.example.testing.model.test;
 
 import com.example.testing.model.Subject;
+import com.example.testing.model.attempt.AttemptResult;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 
@@ -33,9 +34,12 @@ public class Test {
     @OneToMany(cascade = CascadeType.ALL)
     private Set<Question> questions = new HashSet<>();
 
+    @EqualsAndHashCode.Exclude
+    @Builder.Default
+    @OneToMany(cascade = CascadeType.REMOVE)
+    private Set<AttemptResult> attempts = new HashSet<>();
+
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
-
-    private LocalDateTime deletedAt;
 }

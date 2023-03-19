@@ -80,10 +80,7 @@ public class SubjectServiceImpl implements SubjectService {
             throw new ForbiddenException("Not a subject educator");
         }
 
-        // soft deletion
-        subject.setDeletedAt(LocalDateTime.now());
-
-        subjectRepository.save(subject);
+        subjectRepository.delete(subject);
     }
 
     @Override
@@ -100,7 +97,7 @@ public class SubjectServiceImpl implements SubjectService {
     public List<SubjectDto> getAllSubjects() {
         log.debug("Get all subjects");
 
-        return subjectRepository.findAllByDeletedAtIsNull()
+        return subjectRepository.findAll()
                 .stream().map(this::mapSubjectToSubjectDto).collect(Collectors.toList());
     }
 
@@ -111,7 +108,7 @@ public class SubjectServiceImpl implements SubjectService {
         User educator = userRepository.findByIdAndRole(educatorId, UserRole.EDUCATOR)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", educatorId));
 
-        return subjectRepository.findAllByEducatorAndDeletedAtIsNull(educator)
+        return subjectRepository.findAllByEducator(educator)
                 .stream().map(this::mapSubjectToSubjectDto).collect(Collectors.toList());
     }
 
@@ -119,7 +116,7 @@ public class SubjectServiceImpl implements SubjectService {
     public Subject getSubjectEntity(String subjectId) {
         log.debug("Get subject with given id {}", subjectId);
 
-        return subjectRepository.findByIdAndDeletedAtIsNull(subjectId)
+        return subjectRepository.findById(subjectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Subject", "id", subjectId));
     }
 
@@ -139,7 +136,7 @@ public class SubjectServiceImpl implements SubjectService {
     }
 
     private Subject getSubject(String subjectId) {
-        return subjectRepository.findByIdAndDeletedAtIsNull(subjectId)
+        return subjectRepository.findById(subjectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Subject", "id", subjectId));
     }
 

@@ -59,7 +59,7 @@ public class TestServiceImpl implements TestService {
         log.debug("Update test with id {}. Update data: {}", testId, req);
 
         // fetch test
-        Test test = testRepository.findByIdAndDeletedAtIsNull(testId)
+        Test test = testRepository.findById(testId)
                 .orElseThrow(() -> new ResourceNotFoundException("test", "id", testId));
 
         // verify that user is the educator of the test subject
@@ -88,7 +88,7 @@ public class TestServiceImpl implements TestService {
         log.debug("Delete test with id {}", testId);
 
         // fetch test
-        Test test = testRepository.findByIdAndDeletedAtIsNull(testId)
+        Test test = testRepository.findById(testId)
                 .orElseThrow(() -> new ResourceNotFoundException("test", "id", testId));
 
         // verify that user is the educator of the test subject
@@ -97,17 +97,14 @@ public class TestServiceImpl implements TestService {
             throw new ForbiddenException("Not an educator of the subject: " + test.getSubject().getId());
         }
 
-        // set soft deletion timestamp
-        test.setDeletedAt(LocalDateTime.now());
-
-        testRepository.save(test);
+        testRepository.delete(test);
     }
 
     @Override
     public TestDto getTestById(String testId) {
         log.debug("Get test with id: {}", testId);
 
-        Test test = testRepository.findByIdAndDeletedAtIsNull(testId)
+        Test test = testRepository.findById(testId)
                 .orElseThrow(() -> new ResourceNotFoundException("test", "id", testId));
 
         return mapTestToTestDto(test);
@@ -119,13 +116,13 @@ public class TestServiceImpl implements TestService {
 
         Subject subject = subjectService.getSubjectEntity(subjectId);
 
-        return testRepository.findBySubjectAndDeletedAtIsNull(subject)
+        return testRepository.findBySubject(subject)
                 .stream().map(this::mapTestToTestDto).collect(Collectors.toList());
     }
 
     @Override
     public Test getTestEntity(String testId) {
-        return testRepository.findByIdAndDeletedAtIsNull(testId)
+        return testRepository.findById(testId)
                 .orElseThrow(() -> new ResourceNotFoundException("test", "id", testId));
     }
 

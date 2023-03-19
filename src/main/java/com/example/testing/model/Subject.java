@@ -1,13 +1,13 @@
 package com.example.testing.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.example.testing.model.test.Test;
+import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Builder
 @Data
@@ -29,9 +29,12 @@ public class Subject {
     @Column(length = 1024)
     private String description;
 
+    @EqualsAndHashCode.Exclude
+    @Builder.Default
+    @OneToMany(mappedBy = "subject", cascade = CascadeType.REMOVE)
+    private Set<Test> tests = new HashSet<>();
+
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
-
-    private LocalDateTime deletedAt;
 }

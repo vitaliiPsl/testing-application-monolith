@@ -248,13 +248,13 @@ class TestServiceImplTest {
         Test test = Test.builder().id(testId).subject(subject).name("First test").build();
 
         // when
-        when(testRepository.findByIdAndDeletedAtIsNull(testId)).thenReturn(Optional.of(test));
+        when(testRepository.findById(testId)).thenReturn(Optional.of(test));
         when(testRepository.save(any(Test.class))).then(AdditionalAnswers.returnsFirstArg());
 
         TestDto res = testService.updateTest(testId, testDto, user);
 
         // then
-        verify(testRepository).findByIdAndDeletedAtIsNull(testId);
+        verify(testRepository).findById(testId);
         verify(testRepository).save(testCaptor.capture());
 
         assertThat(res.getName(), is(testDto.getName()));
@@ -307,11 +307,11 @@ class TestServiceImplTest {
         Test test = Test.builder().id(testId).subject(subject).name("First test").build();
 
         // when
-        when(testRepository.findByIdAndDeletedAtIsNull(testId)).thenReturn(Optional.of(test));
+        when(testRepository.findById(testId)).thenReturn(Optional.of(test));
 
         // then
         assertThrows(IllegalStateException.class, () -> testService.updateTest(testId, testDto, user));
-        verify(testRepository).findByIdAndDeletedAtIsNull(testId);
+        verify(testRepository).findById(testId);
     }
 
     @org.junit.jupiter.api.Test
@@ -347,11 +347,11 @@ class TestServiceImplTest {
         Test test = Test.builder().id(testId).subject(subject).name("First test").build();
 
         // when
-        when(testRepository.findByIdAndDeletedAtIsNull(testId)).thenReturn(Optional.of(test));
+        when(testRepository.findById(testId)).thenReturn(Optional.of(test));
 
         // then
         assertThrows(IllegalStateException.class, () -> testService.updateTest(testId, testDto, user));
-        verify(testRepository).findByIdAndDeletedAtIsNull(testId);
+        verify(testRepository).findById(testId);
     }
 
     @org.junit.jupiter.api.Test
@@ -369,11 +369,11 @@ class TestServiceImplTest {
         String testId = "qwer-1234";
 
         // when
-        when(testRepository.findByIdAndDeletedAtIsNull(testId)).thenReturn(Optional.empty());
+        when(testRepository.findById(testId)).thenReturn(Optional.empty());
 
         // then
         assertThrows(ResourceNotFoundException.class, () -> testService.updateTest(testId, testDto, user));
-        verify(testRepository).findByIdAndDeletedAtIsNull(testId);
+        verify(testRepository).findById(testId);
     }
 
     @org.junit.jupiter.api.Test
@@ -395,11 +395,11 @@ class TestServiceImplTest {
                 .build();
 
         // when
-        when(testRepository.findByIdAndDeletedAtIsNull(testId)).thenReturn(Optional.of(test));
+        when(testRepository.findById(testId)).thenReturn(Optional.of(test));
 
         // then
         assertThrows(ForbiddenException.class, () -> testService.updateTest(testId, testDto, user));
-        verify(testRepository).findByIdAndDeletedAtIsNull(testId);
+        verify(testRepository).findById(testId);
     }
 
     // DELETE
@@ -415,17 +415,12 @@ class TestServiceImplTest {
         Test test = Test.builder().id(testId).subject(subject).name("First test").build();
 
         // when
-        when(testRepository.findByIdAndDeletedAtIsNull(testId)).thenReturn(Optional.of(test));
-
+        when(testRepository.findById(testId)).thenReturn(Optional.of(test));
         testService.deleteTest(testId, user);
 
         // then
-        verify(testRepository).findByIdAndDeletedAtIsNull(testId);
-        verify(testRepository).save(testCaptor.capture());
-
-        Test capturedTest = testCaptor.getValue();
-        assertThat(capturedTest.getId(), is(testId));
-        assertThat(capturedTest.getDeletedAt(), is(notNullValue()));
+        verify(testRepository).findById(testId);
+        verify(testRepository).delete(test);
     }
 
     @org.junit.jupiter.api.Test
@@ -436,11 +431,11 @@ class TestServiceImplTest {
         String testId = "qwer-1234";
 
         // when
-        when(testRepository.findByIdAndDeletedAtIsNull(testId)).thenReturn(Optional.empty());
+        when(testRepository.findById(testId)).thenReturn(Optional.empty());
 
         // then
         assertThrows(ResourceNotFoundException.class, () -> testService.deleteTest(testId, user));
-        verify(testRepository).findByIdAndDeletedAtIsNull(testId);
+        verify(testRepository).findById(testId);
     }
 
     @org.junit.jupiter.api.Test
@@ -457,11 +452,11 @@ class TestServiceImplTest {
         Test test = Test.builder().id(testId).subject(subject).name("First test").build();
 
         // when
-        when(testRepository.findByIdAndDeletedAtIsNull(testId)).thenReturn(Optional.of(test));
+        when(testRepository.findById(testId)).thenReturn(Optional.of(test));
 
         // then
         assertThrows(ForbiddenException.class, () -> testService.deleteTest(testId, user));
-        verify(testRepository).findByIdAndDeletedAtIsNull(testId);
+        verify(testRepository).findById(testId);
     }
 
     // FETCH
@@ -472,12 +467,12 @@ class TestServiceImplTest {
         Test test = Test.builder().id(testId).name("First test").build();
 
         // when
-        when(testRepository.findByIdAndDeletedAtIsNull(testId)).thenReturn(Optional.of(test));
+        when(testRepository.findById(testId)).thenReturn(Optional.of(test));
 
         TestDto res = testService.getTestById(testId);
 
         // then
-        verify(testRepository).findByIdAndDeletedAtIsNull(testId);
+        verify(testRepository).findById(testId);
 
         assertThat(res.getId(), is(test.getId()));
         assertThat(res.getName(), is(test.getName()));
@@ -489,11 +484,11 @@ class TestServiceImplTest {
         String testId = "qwer-1234";
 
         // when
-        when(testRepository.findByIdAndDeletedAtIsNull(testId)).thenReturn(Optional.empty());
+        when(testRepository.findById(testId)).thenReturn(Optional.empty());
 
         // then
         assertThrows(ResourceNotFoundException.class, () -> testService.getTestById(testId));
-        verify(testRepository).findByIdAndDeletedAtIsNull(testId);
+        verify(testRepository).findById(testId);
     }
 
     @org.junit.jupiter.api.Test
@@ -510,13 +505,13 @@ class TestServiceImplTest {
 
         // when
         when(subjectService.getSubjectEntity(subjectId)).thenReturn(subject);
-        when(testRepository.findBySubjectAndDeletedAtIsNull(subject)).thenReturn(tests);
+        when(testRepository.findBySubject(subject)).thenReturn(tests);
 
         List<TestDto> res = testService.getTestsBySubjectId(subjectId);
 
         // then
         verify(subjectService).getSubjectEntity(subjectId);
-        verify(testRepository).findBySubjectAndDeletedAtIsNull(subject);
+        verify(testRepository).findBySubject(subject);
 
         assertThat(res, hasSize(2));
     }
@@ -532,13 +527,13 @@ class TestServiceImplTest {
 
         // when
         when(subjectService.getSubjectEntity(subjectId)).thenReturn(subject);
-        when(testRepository.findBySubjectAndDeletedAtIsNull(subject)).thenReturn(tests);
+        when(testRepository.findBySubject(subject)).thenReturn(tests);
 
         List<TestDto> res = testService.getTestsBySubjectId(subjectId);
 
         // then
         verify(subjectService).getSubjectEntity(subjectId);
-        verify(testRepository).findBySubjectAndDeletedAtIsNull(subject);
+        verify(testRepository).findBySubject(subject);
 
         assertThat(res, hasSize(0));
     }
@@ -563,12 +558,12 @@ class TestServiceImplTest {
         Test test = Test.builder().id(testId).name("First test").build();
 
         // when
-        when(testRepository.findByIdAndDeletedAtIsNull(testId)).thenReturn(Optional.of(test));
+        when(testRepository.findById(testId)).thenReturn(Optional.of(test));
 
         Test res = testService.getTestEntity(testId);
 
         // then
-        verify(testRepository).findByIdAndDeletedAtIsNull(testId);
+        verify(testRepository).findById(testId);
 
         assertThat(res.getId(), is(test.getId()));
         assertThat(res.getName(), is(test.getName()));
@@ -580,10 +575,10 @@ class TestServiceImplTest {
         String testId = "qwer-1234";
 
         // when
-        when(testRepository.findByIdAndDeletedAtIsNull(testId)).thenReturn(Optional.empty());
+        when(testRepository.findById(testId)).thenReturn(Optional.empty());
 
         // then
         assertThrows(ResourceNotFoundException.class, () -> testService.getTestEntity(testId));
-        verify(testRepository).findByIdAndDeletedAtIsNull(testId);
+        verify(testRepository).findById(testId);
     }
 }
