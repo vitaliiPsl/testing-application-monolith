@@ -82,6 +82,8 @@ class AuthServiceImplTest {
         assertThat(user.getPassword(), is(encodedPassword));
         assertThat(user.getRole(), is(userDto.getRole()));
         assertThat(user.isEnabled(), is(true));
+        assertThat(user.getCreatedAt(), is(notNullValue()));
+        assertThat(user.getUpdatedAt(), is(notNullValue()));
 
         assertThat(response.getEmail(), is(userDto.getEmail()));
     }
