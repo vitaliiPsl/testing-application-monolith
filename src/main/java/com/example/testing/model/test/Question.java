@@ -12,24 +12,18 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "questions", indexes = {
-        @Index(name = "idx_questions_test", columnList = "test_id")
-})
+@Table(name = "questions")
 public class Question {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @ToString.Exclude
-    @ManyToOne
-    private Test test;
 
     @Column(length = 512)
     private String question;
 
     @EqualsAndHashCode.Exclude
     @Builder.Default
-    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL)
     private Set<Option> options = new HashSet<>();
 
     public Set<Option> getCorrectOptions() {

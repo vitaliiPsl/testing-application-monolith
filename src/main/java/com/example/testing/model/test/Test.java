@@ -30,7 +30,7 @@ public class Test {
 
     @EqualsAndHashCode.Exclude
     @Builder.Default
-    @OneToMany(mappedBy = "test", cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL)
     private Set<Question> questions = new HashSet<>();
 
     private LocalDateTime createdAt;

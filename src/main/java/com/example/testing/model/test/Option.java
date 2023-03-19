@@ -9,17 +9,11 @@ import javax.persistence.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "options", indexes = {
-        @Index(name = "idx_options_question", columnList = "question_id")
-})
+@Table(name = "options")
 public class Option {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @ToString.Exclude
-    @ManyToOne
-    private Question question;
 
     @Column(length = 512)
     private String option;

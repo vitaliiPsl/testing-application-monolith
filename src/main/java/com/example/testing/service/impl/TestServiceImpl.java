@@ -46,7 +46,7 @@ public class TestServiceImpl implements TestService {
         Test test = createTest(req, subject);
 
         // map question dtos to questions
-        Set<Question> questions = createQuestions(req.getQuestions(), test);
+        Set<Question> questions = createQuestions(req.getQuestions());
         test.setQuestions(questions);
 
         // save test
@@ -75,7 +75,7 @@ public class TestServiceImpl implements TestService {
         test.setUpdatedAt(LocalDateTime.now());
 
         // map questions
-        Set<Question> questions = createQuestions(req.getQuestions(), test);
+        Set<Question> questions = createQuestions(req.getQuestions());
         test.setQuestions(questions);
 
         // save updated test
@@ -138,17 +138,16 @@ public class TestServiceImpl implements TestService {
                 .build();
     }
 
-    private Set<Question> createQuestions(Set<QuestionDto> questionDtos, Test test) {
-        return questionDtos.stream().map(questionDto -> createQuestion(questionDto, test)).collect(Collectors.toSet());
+    private Set<Question> createQuestions(Set<QuestionDto> questionDtos) {
+        return questionDtos.stream().map(this::createQuestion).collect(Collectors.toSet());
     }
 
-    private Question createQuestion(QuestionDto questionDto, Test test) {
+    private Question createQuestion(QuestionDto questionDto) {
         Question question = Question.builder()
-                .test(test)
                 .question(questionDto.getQuestion())
                 .build();
 
-        Set<Option> options = createOptions(questionDto.getOptions(), question);
+        Set<Option> options = createOptions(questionDto.getOptions());
         if (options.size() < MIN_NUMBER_OF_OPTIONS) {
             log.error("Requires at least {} option. Received: {}", MIN_NUMBER_OF_OPTIONS, options.size());
             throw new IllegalStateException(
@@ -167,13 +166,12 @@ public class TestServiceImpl implements TestService {
         return question;
     }
 
-    private Set<Option> createOptions(Set<OptionDto> optionDtos, Question question) {
-        return optionDtos.stream().map(optionDto -> createOption(optionDto, question)).collect(Collectors.toSet());
+    private Set<Option> createOptions(Set<OptionDto> optionDtos) {
+        return optionDtos.stream().map(this::createOption).collect(Collectors.toSet());
     }
 
-    private Option createOption(OptionDto optionDto, Question question) {
+    private Option createOption(OptionDto optionDto) {
         return Option.builder()
-                .question(question)
                 .option(optionDto.getOption())
                 .correct(optionDto.isCorrect())
                 .build();
