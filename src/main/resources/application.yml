@@ -1,0 +1,15 @@
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: update
+security:
+  jwt:
+    secret: jwt.super.secret.key
+    # token expires in 7 days
+    token-expiration-time-min: 10080
+server:
+  port: ${PORT}

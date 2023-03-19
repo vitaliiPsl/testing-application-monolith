@@ -1,0 +1,24 @@
+version: '3.8'
+services:
+  backend:
+    build: .
+    image: testing-backend
+    container_name: testing-backend
+    ports:
+      - "80:8080"
+    depends_on:
+      - postgres
+    environment:
+      PORT: 8080
+      DB_URL: jdbc:postgresql://postgres:5432/testing-db
+      DB_USERNAME: dev
+      DB_PASSWORD: dev123
+  postgres:
+    image: postgres
+    container_name: testing-db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: dev
+      POSTGRES_PASSWORD: dev123
+      POSTGRES_DB: testing-db
