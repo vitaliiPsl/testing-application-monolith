@@ -16,7 +16,7 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/subjects/{subjectId}/tests")
+@RequestMapping("/api/tests")
 public class TestController {
 
     private final TestService testService;
@@ -25,46 +25,44 @@ public class TestController {
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
     TestDto saveTest(
-            @PathVariable String subjectId,
             @RequestBody @Valid TestDto req, @AuthenticationPrincipal User user
     ) {
-        return testService.saveTest(subjectId, req, user);
+        return testService.saveTest(req, user);
     }
 
     @PutMapping("{testId}")
     TestDto updateTest(
-            @PathVariable String subjectId, @PathVariable String testId,
+            @PathVariable String testId,
             @RequestBody @Valid TestDto req, @AuthenticationPrincipal User user
     ) {
-        return testService.updateTest(subjectId, testId, req, user);
+        return testService.updateTest(testId, req, user);
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("{testId}")
     void deleteTest(
-            @PathVariable String subjectId, @PathVariable String testId,
+            @PathVariable String testId,
             @AuthenticationPrincipal User user
     ) {
-        testService.deleteTest(subjectId, testId, user);
+        testService.deleteTest(testId, user);
     }
 
     @GetMapping("{testId}")
-    TestDto getTests(@PathVariable String subjectId, @PathVariable String testId) {
-        return testService.getTestById(subjectId, testId);
+    TestDto getTests(@PathVariable String testId) {
+        return testService.getTestById(testId);
     }
 
-    @GetMapping
-    List<TestDto> getTestById(@PathVariable String subjectId) {
+    @GetMapping(params = "subjectId")
+    List<TestDto> getTestBySubjectId(@RequestParam String subjectId) {
         return testService.getTestsBySubjectId(subjectId);
     }
 
     @PostMapping("{testId}/attempts")
     AttemptResultDto takeTest(
-            @PathVariable String subjectId,
             @PathVariable String testId,
             @RequestBody @Valid AttemptDto attemptDto,
             @AuthenticationPrincipal User user
     ) {
-        return attemptService.processAttempt(subjectId, testId, attemptDto, user);
+        return attemptService.processAttempt(testId, attemptDto, user);
     }
 }
