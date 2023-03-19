@@ -1,6 +1,5 @@
 package com.example.testing.payload.test;
 
-import com.example.testing.payload.SubjectDto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,8 +21,9 @@ public class TestDto {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private String id;
 
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    private SubjectDto subject;
+    @JsonProperty(access = JsonProperty.Access.READ_WRITE)
+    @NotBlank(message = "Id of the subject is required")
+    private String subjectId;
 
     @JsonProperty(access = JsonProperty.Access.READ_WRITE)
     @NotBlank(message = "Test name is required")
