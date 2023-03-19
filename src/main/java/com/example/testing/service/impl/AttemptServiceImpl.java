@@ -1,5 +1,7 @@
 package com.example.testing.service.impl;
 
+import com.example.testing.exceptions.ForbiddenException;
+import com.example.testing.exceptions.ResourceNotFoundException;
 import com.example.testing.model.User;
 import com.example.testing.model.attempt.AttemptAnswer;
 import com.example.testing.model.attempt.AttemptQuestion;
@@ -70,6 +72,43 @@ public class AttemptServiceImpl implements AttemptService {
         // save attempt
         attempt = attemptRepository.save(attempt);
         return mapAttemptResultToAttemptResultDto(attempt);
+    }
+
+    @Override
+    public AttemptResultDto getAttemptById(String attemptId, User user) {
+        log.debug("Get attempt by id {}", attemptId);
+
+        AttemptResult attempt = attemptRepository.findById(attemptId)
+                .orElseThrow(() -> new ResourceNotFoundException("Attempt", "id", attemptId));
+
+        if (!attempt.getUser().equals(user) && !attempt.getTest().getSubject().getEducator().equals(user)) {
+            log.error("User {} has no access to the attempt: {}", user.getId(), attempt);
+            throw new ForbiddenException("No enough permissions to access the attempt result");
+        }
+
+        return mapAttemptResultToAttemptResultDto(attempt);
+    }
+
+    @Override
+    public List<AttemptResultDto> getAttemptsByTestId(String testId, User user) {
+        log.debug("Get attempts by id of the test: {}", testId);
+
+        Test test = testService.getTestEntity(testId);
+        if(!test.getSubject().getEducator().equals(user)) {
+            log.error("Use {} is not the educator of the subject of the test {}", user.getId(), test.getSubject());
+            throw new ForbiddenException("Not an educator of the test subject");
+        }
+
+        return attemptRepository.findByTest(test)
+                .stream().map(this::mapAttemptResultToAttemptResultDto).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<AttemptResultDto> getAttemptsByUser(User user) {
+        log.debug("Get attempts by user: {}", user.getId());
+
+        return attemptRepository.findByUser(user)
+                .stream().map(this::mapAttemptResultToAttemptResultDto).collect(Collectors.toList());
     }
 
     private Set<AttemptQuestion> checkQuestionsAnswers(Set<Question> questions, List<AttemptQuestionDto> attemptQuestions) {
