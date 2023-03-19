@@ -41,9 +41,8 @@ class AttemptServiceImplTest {
     ArgumentCaptor<AttemptResult> attemptCaptor;
 
     @org.junit.jupiter.api.Test
-    void whenProcessAttempt_givenAllAnswersCorrect_thenSaveAttemptResultWithMaxScore() {
+    void whenProcessAttempt1_givenAllAnswersCorrect_thenSaveAttemptResultWithMaxScore() {
         // given
-        String subjectId = "1234-qwer";
         String testId = "qwer-1234";
 
         Test test = buildTest(testId);
@@ -66,13 +65,13 @@ class AttemptServiceImplTest {
         AttemptDto attemptDto = AttemptDto.builder().questions(Set.of(question1, question2)).build();
 
         // when
-        when(testService.getTestEntity(subjectId, testId)).thenReturn(test);
+        when(testService.getTestEntity(testId)).thenReturn(test);
         when(attemptRepository.save(Mockito.any(AttemptResult.class))).then(AdditionalAnswers.returnsFirstArg());
 
-        AttemptResultDto res = attemptService.processAttempt(subjectId, testId, attemptDto, user);
+        AttemptResultDto res = attemptService.processAttempt(testId, attemptDto, user);
 
         // then
-        verify(testService).getTestEntity(subjectId, testId);
+        verify(testService).getTestEntity(testId);
         verify(attemptRepository).save(attemptCaptor.capture());
 
         AttemptResult attemptResult = attemptCaptor.getValue();
@@ -88,11 +87,9 @@ class AttemptServiceImplTest {
         assertThat(res.getAttemptQuestions(), hasSize(2));
     }
 
-
     @org.junit.jupiter.api.Test
-    void whenProcessAttempt_givenOnlyOneCorrectAnswerToQuestionWithTwoCorrectAnswers_thenSaveAttemptResultWithScore2OutOf3() {
+    void whenProcessAttempt1_givenOnlyOneCorrectAnswerToQuestionWithTwoCorrectAnswers_thenSaveAttemptResultWithScore2OutOf3() {
         // given
-        String subjectId = "1234-qwer";
         String testId = "qwer-1234";
 
         Test test = buildTest(testId);
@@ -115,13 +112,13 @@ class AttemptServiceImplTest {
         AttemptDto attemptDto = AttemptDto.builder().questions(Set.of(question1, question2)).build();
 
         // when
-        when(testService.getTestEntity(subjectId, testId)).thenReturn(test);
+        when(testService.getTestEntity(testId)).thenReturn(test);
         when(attemptRepository.save(Mockito.any(AttemptResult.class))).then(AdditionalAnswers.returnsFirstArg());
 
-        AttemptResultDto res = attemptService.processAttempt(subjectId, testId, attemptDto, user);
+        AttemptResultDto res = attemptService.processAttempt(testId, attemptDto, user);
 
         // then
-        verify(testService).getTestEntity(subjectId, testId);
+        verify(testService).getTestEntity(testId);
         verify(attemptRepository).save(attemptCaptor.capture());
 
         AttemptResult attemptResult = attemptCaptor.getValue();
@@ -138,9 +135,8 @@ class AttemptServiceImplTest {
     }
 
     @org.junit.jupiter.api.Test
-    void whenProcessAttempt_givenAllAnswersWrong_thenSaveAttemptResultWithZeroScore() {
+    void whenProcessAttempt1_givenAllAnswersWrong_thenSaveAttemptResultWithZeroScore() {
         // given
-        String subjectId = "1234-qwer";
         String testId = "qwer-1234";
 
         Test test = buildTest(testId);
@@ -162,13 +158,13 @@ class AttemptServiceImplTest {
         AttemptDto attemptDto = AttemptDto.builder().questions(Set.of(question1, question2)).build();
 
         // when
-        when(testService.getTestEntity(subjectId, testId)).thenReturn(test);
+        when(testService.getTestEntity(testId)).thenReturn(test);
         when(attemptRepository.save(Mockito.any(AttemptResult.class))).then(AdditionalAnswers.returnsFirstArg());
 
-        AttemptResultDto res = attemptService.processAttempt(subjectId, testId, attemptDto, user);
+        AttemptResultDto res = attemptService.processAttempt(testId, attemptDto, user);
 
         // then
-        verify(testService).getTestEntity(subjectId, testId);
+        verify(testService).getTestEntity(testId);
         verify(attemptRepository).save(attemptCaptor.capture());
 
         AttemptResult attemptResult = attemptCaptor.getValue();
@@ -185,9 +181,8 @@ class AttemptServiceImplTest {
     }
 
     @org.junit.jupiter.api.Test
-    void whenProcessAttempt_givenAnswers_thenSaveAttemptResultWithZeroScore() {
+    void whenProcessAttempt1_givenAnswers_thenSaveAttemptResultWithZeroScore() {
         // given
-        String subjectId = "1234-qwer";
         String testId = "qwer-1234";
 
         Test test = buildTest(testId);
@@ -207,13 +202,13 @@ class AttemptServiceImplTest {
         AttemptDto attemptDto = AttemptDto.builder().questions(Set.of(question1, question2)).build();
 
         // when
-        when(testService.getTestEntity(subjectId, testId)).thenReturn(test);
+        when(testService.getTestEntity(testId)).thenReturn(test);
         when(attemptRepository.save(Mockito.any(AttemptResult.class))).then(AdditionalAnswers.returnsFirstArg());
 
-        AttemptResultDto res = attemptService.processAttempt(subjectId, testId, attemptDto, user);
+        AttemptResultDto res = attemptService.processAttempt(testId, attemptDto, user);
 
         // then
-        verify(testService).getTestEntity(subjectId, testId);
+        verify(testService).getTestEntity(testId);
         verify(attemptRepository).save(attemptCaptor.capture());
 
         AttemptResult attemptResult = attemptCaptor.getValue();
@@ -230,9 +225,8 @@ class AttemptServiceImplTest {
     }
 
     @org.junit.jupiter.api.Test
-    void whenProcessAttempt_givenMoreAnswersThanPossibleNumberOfCorrectAnswers_thenThrowException() {
+    void whenProcessAttempt1_givenMoreAnswersThanPossibleNumberOfCorrectAnswers_thenThrowException() {
         // given
-        String subjectId = "1234-qwer";
         String testId = "qwer-1234";
 
         Test test = buildTest(testId);
@@ -256,17 +250,16 @@ class AttemptServiceImplTest {
         AttemptDto attemptDto = AttemptDto.builder().questions(Set.of(question1, question2)).build();
 
         // when
-        when(testService.getTestEntity(subjectId, testId)).thenReturn(test);
+        when(testService.getTestEntity(testId)).thenReturn(test);
 
         // then
-        assertThrows(IllegalStateException.class, () -> attemptService.processAttempt(subjectId, testId, attemptDto, user));
-        verify(testService).getTestEntity(subjectId, testId);
+        assertThrows(IllegalStateException.class, () -> attemptService.processAttempt(testId, attemptDto, user));
+        verify(testService).getTestEntity(testId);
     }
 
     @org.junit.jupiter.api.Test
-    void whenProcessAttempt_givenWrongOption_thenThrowException() {
+    void whenProcessAttempt1_givenWrongOption_thenThrowException() {
         // given
-        String subjectId = "1234-qwer";
         String testId = "qwer-1234";
 
         Test test = buildTest(testId);
@@ -289,17 +282,16 @@ class AttemptServiceImplTest {
         AttemptDto attemptDto = AttemptDto.builder().questions(Set.of(question1, question2)).build();
 
         // when
-        when(testService.getTestEntity(subjectId, testId)).thenReturn(test);
+        when(testService.getTestEntity(testId)).thenReturn(test);
 
         // then
-        assertThrows(IllegalStateException.class, () -> attemptService.processAttempt(subjectId, testId, attemptDto, user));
-        verify(testService).getTestEntity(subjectId, testId);
+        assertThrows(IllegalStateException.class, () -> attemptService.processAttempt(testId, attemptDto, user));
+        verify(testService).getTestEntity(testId);
     }
 
     @org.junit.jupiter.api.Test
-    void whenProcessAttempt_givenTestDoesntExist_thenThrowException() {
+    void whenProcessAttempt1_givenTestDoesntExist_thenThrowException() {
         // given
-        String subjectId = "1234-qwer";
         String testId = "qwer-1234";
 
         User user = User.builder().id("1234").email("j.doe@mail.com").build();
@@ -307,11 +299,11 @@ class AttemptServiceImplTest {
         AttemptDto attemptDto = AttemptDto.builder().questions(Set.of()).build();
 
         // when
-        when(testService.getTestEntity(subjectId, testId)).thenThrow(ResourceNotFoundException.class);
+        when(testService.getTestEntity(testId)).thenThrow(ResourceNotFoundException.class);
 
         // then
-        assertThrows(ResourceNotFoundException.class, () -> attemptService.processAttempt(subjectId, testId, attemptDto, user));
-        verify(testService).getTestEntity(subjectId, testId);
+        assertThrows(ResourceNotFoundException.class, () -> attemptService.processAttempt(testId, attemptDto, user));
+        verify(testService).getTestEntity(testId);
     }
 
     private Test buildTest(String id) {

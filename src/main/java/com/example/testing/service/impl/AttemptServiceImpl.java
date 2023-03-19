@@ -38,11 +38,11 @@ public class AttemptServiceImpl implements AttemptService {
     private final ModelMapper mapper;
 
     @Override
-    public AttemptResultDto processAttempt(String subjectId, String testId, AttemptDto attemptDto, User user) {
-        log.debug("Process attempt of the test with subject id {} and test id {}. Attempt details: {}", subjectId, testId, attemptDto);
+    public AttemptResultDto processAttempt(String testId, AttemptDto attemptDto, User user) {
+        log.debug("Process attempt of the test with id {}. Attempt details: {}", testId, attemptDto);
 
         // find test
-        Test test = testService.getTestEntity(subjectId, testId);
+        Test test = testService.getTestEntity(testId);
         Set<Question> questions = test.getQuestions();
 
         // check answers
@@ -57,7 +57,7 @@ public class AttemptServiceImpl implements AttemptService {
         // get score and assign attempt to attempt questions
         int score = 0;
         int maxScore = 0;
-        for (var question: attemptQuestions) {
+        for (var question : attemptQuestions) {
             question.setAttempt(attempt);
             score += question.getScore();
             maxScore += question.getMaxScore();
@@ -94,7 +94,7 @@ public class AttemptServiceImpl implements AttemptService {
 
         // set answer question and count correct answers
         int correctAnswers = 0;
-        for (var answer: answers) {
+        for (var answer : answers) {
             answer.setQuestion(attemptQuestion);
             correctAnswers += answer.isCorrect() ? 1 : 0;
         }

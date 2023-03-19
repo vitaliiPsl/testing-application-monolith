@@ -12,11 +12,10 @@ public interface AttemptService {
     /**
      * Process test attempt and return result
      *
-     * @param subjectId  is of the subject
      * @param testId     id of the test
      * @param attemptDto attempt details
      * @param user       authenticated user
      * @return attempt result
      */
-    AttemptResultDto processAttempt(String subjectId, String testId, AttemptDto attemptDto, User user);
+    AttemptResultDto processAttempt(String testId, AttemptDto attemptDto, User user);
 }
